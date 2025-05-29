@@ -63,6 +63,60 @@ export type Database = {
         }
         Relationships: []
       }
+      cars: {
+        Row: {
+          created_at: string
+          engine_size: string | null
+          fuel_type: string | null
+          id: string
+          inspection_due_date: string | null
+          license_plate: string
+          make: string | null
+          mileage: number | null
+          model: string | null
+          registration_date: string | null
+          technical_approval_date: string | null
+          updated_at: string
+          user_id: string
+          vin: string | null
+          year: number | null
+        }
+        Insert: {
+          created_at?: string
+          engine_size?: string | null
+          fuel_type?: string | null
+          id?: string
+          inspection_due_date?: string | null
+          license_plate: string
+          make?: string | null
+          mileage?: number | null
+          model?: string | null
+          registration_date?: string | null
+          technical_approval_date?: string | null
+          updated_at?: string
+          user_id: string
+          vin?: string | null
+          year?: number | null
+        }
+        Update: {
+          created_at?: string
+          engine_size?: string | null
+          fuel_type?: string | null
+          id?: string
+          inspection_due_date?: string | null
+          license_plate?: string
+          make?: string | null
+          mileage?: number | null
+          model?: string | null
+          registration_date?: string | null
+          technical_approval_date?: string | null
+          updated_at?: string
+          user_id?: string
+          vin?: string | null
+          year?: number | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -316,6 +370,27 @@ export type Database = {
           },
         ]
       }
+      user_api_quotas: {
+        Row: {
+          date: string
+          id: string
+          request_count: number | null
+          user_id: string
+        }
+        Insert: {
+          date?: string
+          id?: string
+          request_count?: number | null
+          user_id: string
+        }
+        Update: {
+          date?: string
+          id?: string
+          request_count?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_preferences: {
         Row: {
           created_at: string | null
@@ -345,6 +420,39 @@ export type Database = {
           push_notifications?: boolean | null
           sms_notifications?: boolean | null
           updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vegvesen_api_logs: {
+        Row: {
+          error_message: string | null
+          id: string
+          ip_address: unknown | null
+          license_plate: string
+          request_timestamp: string
+          response_status: number | null
+          success: boolean | null
+          user_id: string
+        }
+        Insert: {
+          error_message?: string | null
+          id?: string
+          ip_address?: unknown | null
+          license_plate: string
+          request_timestamp?: string
+          response_status?: number | null
+          success?: boolean | null
+          user_id: string
+        }
+        Update: {
+          error_message?: string | null
+          id?: string
+          ip_address?: unknown | null
+          license_plate?: string
+          request_timestamp?: string
+          response_status?: number | null
+          success?: boolean | null
           user_id?: string
         }
         Relationships: []
@@ -568,6 +676,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_api_quota: {
+        Args: { user_uuid: string }
+        Returns: boolean
+      }
       create_workshop_from_registration: {
         Args: { registration_id: string }
         Returns: string
@@ -579,9 +691,24 @@ export type Database = {
           role: string
         }[]
       }
+      increment_api_quota: {
+        Args: { user_uuid: string }
+        Returns: undefined
+      }
       is_admin: {
         Args: { _user_id?: string }
         Returns: boolean
+      }
+      log_vegvesen_api_call: {
+        Args: {
+          user_uuid: string
+          plate: string
+          status_code: number
+          error_msg?: string
+          user_ip?: unknown
+          call_success?: boolean
+        }
+        Returns: undefined
       }
       update_venue_sunshine_status: {
         Args: Record<PropertyKey, never>

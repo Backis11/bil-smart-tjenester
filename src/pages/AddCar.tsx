@@ -6,16 +6,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useVegvesenLookup } from "@/hooks/useVegvesenLookup";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Car, Search } from "lucide-react";
+import { Car, Search, CheckCircle } from "lucide-react";
 
 const AddCar = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { lookupVehicle, saveCar, isLoading } = useVegvesenLookup();
   const [licensePlate, setLicensePlate] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [carData, setCarData] = useState<any>(null);
+  const [vehicleData, setVehicleData] = useState<any>(null);
 
   // Manual car data form
   const [manualData, setManualData] = useState({
@@ -27,7 +28,7 @@ const AddCar = () => {
     engineSize: ""
   });
 
-  const handleLicensePlateSearch = async () => {
+  const handleVegvesenLookup = async () => {
     if (!licensePlate.trim()) {
       toast({
         title: "Feil",
@@ -37,23 +38,28 @@ const AddCar = () => {
       return;
     }
 
-    setIsLoading(true);
-    // TODO: Implement API call to Vegvesenet when API key is available
-    // For now, show placeholder message
-    setTimeout(() => {
-      toast({
-        title: "Kommer snart",
-        description: "Integrasjon med Vegvesenet kommer snart. Fyll ut informasjonen manuelt for nå.",
-      });
-      setIsLoading(false);
-    }, 1000);
+    const data = await lookupVehicle(licensePlate);
+    if (data) {
+      setVehicleData(data);
+    }
   };
 
-  const handleManualSubmit = (e: React.FormEvent) => {
+  const handleSaveVegvesenData = async () => {
+    if (!vehicleData) return;
+
+    const saved = await saveCar(vehicleData);
+    if (saved) {
+      // Reset form
+      setVehicleData(null);
+      setLicensePlate("");
+    }
+  };
+
+  const handleManualSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate manual data
-    if (!manualData.make || !manualData.model || !manualData.year) {
+    if (!manualData.make || !manualData.model || !manualData.year || !licensePlate) {
       toast({
         title: "Feil",
         description: "Vennligst fyll ut alle obligatoriske felt",
@@ -62,22 +68,29 @@ const AddCar = () => {
       return;
     }
 
-    // TODO: Save car data to database
-    toast({
-      title: "Bil registrert",
-      description: `${manualData.make} ${manualData.model} (${manualData.year}) er lagt til`,
-    });
-    
-    // Reset form
-    setManualData({
-      make: "",
-      model: "",
-      year: "",
-      mileage: "",
-      fuelType: "",
-      engineSize: ""
-    });
-    setLicensePlate("");
+    const carData = {
+      licensePlate: licensePlate.toUpperCase(),
+      make: manualData.make,
+      model: manualData.model,
+      year: parseInt(manualData.year),
+      fuelType: manualData.fuelType,
+      engineSize: manualData.engineSize,
+      mileage: manualData.mileage ? parseInt(manualData.mileage) : undefined
+    };
+
+    const saved = await saveCar(carData);
+    if (saved) {
+      // Reset form
+      setManualData({
+        make: "",
+        model: "",
+        year: "",
+        mileage: "",
+        fuelType: "",
+        engineSize: ""
+      });
+      setLicensePlate("");
+    }
   };
 
   return (
@@ -91,7 +104,7 @@ const AddCar = () => {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
-          {/* Automatic registration via license plate */}
+          {/* Automatic registration via Vegvesenet */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -115,16 +128,46 @@ const AddCar = () => {
                 />
               </div>
               
-              <Button 
-                onClick={handleLicensePlateSearch}
-                disabled={isLoading}
-                className="w-full"
-              >
-                {isLoading ? "Søker..." : "Hent bildata"}
-              </Button>
+              {!vehicleData ? (
+                <Button 
+                  onClick={handleVegvesenLookup}
+                  disabled={isLoading}
+                  className="w-full"
+                >
+                  {isLoading ? "Henter data..." : "Hent bildata"}
+                </Button>
+              ) : (
+                <div className="space-y-4">
+                  <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                      <span className="font-medium text-green-800">Bildata hentet</span>
+                    </div>
+                    <div className="space-y-1 text-sm text-green-700">
+                      <p><strong>Merke:</strong> {vehicleData.make}</p>
+                      <p><strong>Modell:</strong> {vehicleData.model}</p>
+                      <p><strong>Årsmodell:</strong> {vehicleData.year}</p>
+                      <p><strong>Drivstoff:</strong> {vehicleData.fuelType}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Button onClick={handleSaveVegvesenData} className="flex-1">
+                      Registrer bil
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setVehicleData(null)}
+                      className="flex-1"
+                    >
+                      Søk på nytt
+                    </Button>
+                  </div>
+                </div>
+              )}
               
               <p className="text-xs text-gray-500">
-                *Integrasjon med Vegvesenet kommer snart
+                *Du kan gjøre maks 10 oppslag per dag
               </p>
             </CardContent>
           </Card>
@@ -139,6 +182,18 @@ const AddCar = () => {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleManualSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="manualLicensePlate">Registreringsnummer *</Label>
+                  <Input
+                    id="manualLicensePlate"
+                    placeholder="AB12345"
+                    value={licensePlate}
+                    onChange={(e) => setLicensePlate(e.target.value.toUpperCase())}
+                    maxLength={7}
+                    required
+                  />
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="make">Merke *</Label>
