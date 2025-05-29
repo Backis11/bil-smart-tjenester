@@ -381,7 +381,7 @@ const CarDetail = () => {
                     Se dokumenter
                   </Button>
                 </Link>
-                <Link to="/valuation">
+                <Link to={`/valuation/${carData.id}`}>
                   <Button variant="outline" className="w-full justify-start">
                     <Gauge className="h-4 w-4 mr-2" />
                     Verdivurdering

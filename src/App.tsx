@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -58,20 +59,9 @@ const App = () => (
                 </div>
               </AuthGuard>
             } />
-            <Route path="/valuation" element={
+            <Route path="/valuation/:id" element={
               <AuthGuard>
-                <div className="min-h-screen bg-gray-50">
-                  <div className="p-4">
-                    <CarValuation car={{
-                      id: 1,
-                      brand: "Toyota",
-                      model: "Corolla",
-                      year: 2020,
-                      mileage: 45000,
-                      licensePlate: "AB12345"
-                    }} />
-                  </div>
-                </div>
+                <CarValuation />
               </AuthGuard>
             } />
             <Route path="/services" element={<ServiceDiscovery />} />
