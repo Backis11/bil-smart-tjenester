@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +12,7 @@ import {
   Menu,
   X
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const Header = () => {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
@@ -21,6 +20,7 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -36,6 +36,9 @@ const Header = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Don't show search bar on homepage since it has its own search in hero section
+  const showSearchBar = location.pathname !== '/';
 
   const notifications = [
     {
@@ -76,16 +79,18 @@ const Header = () => {
             </div>
           </Link>
 
-          {/* Desktop Search - Only visible on desktop */}
-          <div className="hidden lg:flex flex-1 max-w-lg mx-8">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="Søk etter verksted eller tjeneste..."
-                className="pl-10 pr-4 text-gray-900 placeholder:text-gray-500 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-              />
+          {/* Desktop Search - Only visible on desktop and when not on homepage */}
+          {showSearchBar && (
+            <div className="hidden lg:flex flex-1 max-w-lg mx-8">
+              <div className="relative w-full">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  placeholder="Søk etter verksted eller tjeneste..."
+                  className="pl-10 pr-4 text-gray-900 placeholder:text-gray-500 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
@@ -200,14 +205,16 @@ const Header = () => {
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-gray-200 bg-white">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              {/* Mobile Search - Only visible on mobile/tablet, hidden on desktop */}
-              <div className="relative md:hidden">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Søk etter verksted eller tjeneste..."
-                  className="pl-10 pr-4 text-gray-900 placeholder:text-gray-500 bg-gray-50 border-gray-300"
-                />
-              </div>
+              {/* Mobile Search - Only show if not on homepage */}
+              {showSearchBar && (
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    placeholder="Søk etter verksted eller tjeneste..."
+                    className="pl-10 pr-4 text-gray-900 placeholder:text-gray-500 bg-gray-50 border-gray-300"
+                  />
+                </div>
+              )}
               
               {/* Mobile Notifications */}
               <button
