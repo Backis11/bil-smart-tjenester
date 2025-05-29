@@ -196,12 +196,12 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Mobile Menu - Only show search if desktop search is hidden */}
+        {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-gray-200 bg-white">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              {/* Mobile Search - Only visible when desktop search is hidden */}
-              <div className="relative lg:hidden">
+              {/* Mobile Search - Only visible on mobile/tablet, hidden on desktop */}
+              <div className="relative md:hidden">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
                   placeholder="Søk etter verksted eller tjeneste..."
