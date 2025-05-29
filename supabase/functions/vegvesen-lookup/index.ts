@@ -70,6 +70,8 @@ serve(async (req) => {
 
     const vegvesenUrl = `https://www.vegvesen.no/ws/no/vegvesen/kjoretoy/felles/datautlevering/enkeltoppslag/kjoretoydata?kjennemerke=${licensePlate}`
     
+    console.log('Calling Vegvesen API:', vegvesenUrl)
+    
     const vegvesenResponse = await fetch(vegvesenUrl, {
       headers: {
         'SVV-Authorization': `Apikey ${vegvesenApiKey}`,
@@ -78,6 +80,8 @@ serve(async (req) => {
     })
 
     const responseData = await vegvesenResponse.json()
+    console.log('Vegvesen API response status:', vegvesenResponse.status)
+    console.log('Vegvesen API response data:', JSON.stringify(responseData, null, 2))
 
     // Log the API call
     await supabaseClient.rpc('log_vegvesen_api_call', {
@@ -113,11 +117,15 @@ serve(async (req) => {
       )
     }
 
-    // Format the response data
+    console.log('Vehicle data found:', JSON.stringify(vehicleData, null, 2))
+
+    // Format the response data based on actual Vegvesen API structure
     const formattedData = {
       licensePlate: licensePlate,
-      make: vehicleData.godkjenning?.tekniskGodkjenning?.kjoretoyklassifisering?.beskrivelse || '',
-      model: vehicleData.godkjenning?.tekniskGodkjenning?.handelsbenevnelse?.[0] || '',
+      make: vehicleData.godkjenning?.tekniskGodkjenning?.kjoretoyklassifisering?.beskrivelse || 
+            vehicleData.godkjenning?.tekniskGodkjenning?.tekniskeData?.generelt?.merke?.[0]?.merke || '',
+      model: vehicleData.godkjenning?.tekniskGodkjenning?.handelsbenevnelse?.[0] || 
+             vehicleData.godkjenning?.tekniskGodkjenning?.tekniskeData?.generelt?.handelsbetegnelse?.[0] || '',
       year: vehicleData.godkjenning?.forstegangsregistrering?.registrertForstegangNorgeDato ? 
         new Date(vehicleData.godkjenning.forstegangsregistrering.registrertForstegangNorgeDato).getFullYear() : null,
       vin: vehicleData.kjennemerke?.understellsnummer || '',
@@ -127,6 +135,8 @@ serve(async (req) => {
       technicalApprovalDate: vehicleData.godkjenning?.godkjenningsDato || null,
       inspectionDueDate: vehicleData.periodiskKjoretoyKontroll?.kontrollfrist || null
     }
+
+    console.log('Formatted data:', JSON.stringify(formattedData, null, 2))
 
     return new Response(
       JSON.stringify(formattedData),
