@@ -20,15 +20,6 @@ const MobileMenu = ({
 }: MobileMenuProps) => {
   const unreadCount = 2; // This should come from props or context in a real app
 
-  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      const searchTerm = (e.target as HTMLInputElement).value;
-      if (searchTerm.trim()) {
-        window.location.href = `/services?search=${encodeURIComponent(searchTerm)}`;
-      }
-    }
-  };
-
   return (
     <>
       {/* Mobile Menu Button */}
@@ -47,7 +38,7 @@ const MobileMenu = ({
           <div className="px-2 pt-2 pb-3 space-y-1">
             {/* Mobile Search - Only show if not on homepage */}
             {showSearchBar && (
-              <SearchBar onKeyDown={handleSearchKeyDown} />
+              <SearchBar />
             )}
             
             {/* Mobile Notifications */}
