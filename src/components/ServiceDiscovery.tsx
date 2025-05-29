@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,8 @@ import { Link, useSearchParams } from "react-router-dom";
 import { allWorkshops } from "@/data/workshops";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import MobileOptimizedCard from "@/components/MobileOptimizedCard";
+import ResponsiveGrid from "@/components/ResponsiveGrid";
 
 const ServiceDiscovery = () => {
   const [searchParams] = useSearchParams();
@@ -43,19 +46,19 @@ const ServiceDiscovery = () => {
     <div className="min-h-screen bg-gray-50">
       <Header />
       
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Finn verksted</h1>
+      <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Finn verksted</h1>
           
           {/* Search and Filters */}
           <div className="space-y-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
                 placeholder="Søk etter verksted, by eller tjeneste..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 text-gray-900 placeholder:text-gray-500 bg-white"
+                className="pl-10 text-gray-900 placeholder:text-gray-500 bg-white text-base"
               />
             </div>
             
@@ -66,14 +69,15 @@ const ServiceDiscovery = () => {
                   variant={selectedFilter === filter ? "default" : "outline"}
                   size="sm"
                   onClick={() => setSelectedFilter(filter)}
+                  className="text-xs sm:text-sm"
                 >
                   {filter}
                 </Button>
               ))}
             </div>
             
-            <div className="flex justify-between items-center">
-              <p className="text-gray-600">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+              <p className="text-gray-600 text-sm">
                 {filteredWorkshops.length} verksteder funnet
               </p>
               
@@ -82,15 +86,19 @@ const ServiceDiscovery = () => {
                   variant={viewMode === "list" ? "default" : "outline"}
                   size="sm"
                   onClick={() => setViewMode("list")}
+                  className="flex-1 sm:flex-none"
                 >
                   <List className="h-4 w-4" />
+                  <span className="ml-2 sm:hidden">Liste</span>
                 </Button>
                 <Button
                   variant={viewMode === "map" ? "default" : "outline"}
                   size="sm"
                   onClick={() => setViewMode("map")}
+                  className="flex-1 sm:flex-none"
                 >
                   <Map className="h-4 w-4" />
+                  <span className="ml-2 sm:hidden">Kart</span>
                 </Button>
               </div>
             </div>
@@ -98,47 +106,49 @@ const ServiceDiscovery = () => {
         </div>
 
         {viewMode === "map" ? (
-          <div className="bg-gray-200 rounded-lg h-96 flex items-center justify-center mb-8">
+          <div className="bg-gray-200 rounded-lg h-64 sm:h-96 flex items-center justify-center mb-6 sm:mb-8">
             <p className="text-gray-600">Kartvisning kommer snart</p>
           </div>
         ) : null}
 
         {/* Workshop List */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <ResponsiveGrid columns={{ mobile: 1, tablet: 2, desktop: 3 }}>
           {filteredWorkshops.map((workshop) => (
             <Link key={workshop.id} to={`/workshop/${workshop.id}`}>
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex-1">
-                      <h3 className="font-bold text-lg mb-1 line-clamp-1">{workshop.name}</h3>
-                      <div className="flex items-center text-sm text-gray-600 mb-2">
-                        <MapPin className="h-3 w-3 mr-1" />
-                        <span>{workshop.city}</span>
+              <MobileOptimizedCard className="h-full">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex justify-between items-start mb-3 sm:mb-4">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-base sm:text-lg mb-1 line-clamp-1">{workshop.name}</h3>
+                      <div className="flex items-center text-xs sm:text-sm text-gray-600 mb-2">
+                        <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
+                        <span className="truncate">{workshop.city}</span>
                         {workshop.distance && (
                           <>
-                            <span className="mx-1">•</span>
-                            <span>{workshop.distance}</span>
+                            <span className="mx-1 hidden sm:inline">•</span>
+                            <span className="hidden sm:inline">{workshop.distance}</span>
                           </>
                         )}
                       </div>
                     </div>
                     {workshop.featured && (
-                      <Badge className="bg-yellow-100 text-yellow-800">Utvalgt</Badge>
+                      <Badge className="bg-yellow-100 text-yellow-800 text-xs ml-2 flex-shrink-0">
+                        Utvalgt
+                      </Badge>
                     )}
                   </div>
                   
                   <div className="flex items-center mb-3">
-                    <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                    <span className="text-sm text-gray-600 ml-1">{workshop.rating}</span>
+                    <Star className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-400 fill-current" />
+                    <span className="text-xs sm:text-sm text-gray-600 ml-1">{workshop.rating}</span>
                     <span className="text-gray-400 mx-1">•</span>
-                    <span className="text-sm text-gray-600">{workshop.reviewCount} anmeldelser</span>
+                    <span className="text-xs sm:text-sm text-gray-600">{workshop.reviewCount} anmeldelser</span>
                   </div>
                   
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">{workshop.description}</p>
+                  <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 line-clamp-2">{workshop.description}</p>
                   
                   <div className="space-y-2">
-                    <p className="text-sm font-medium">{workshop.priceRange}</p>
+                    <p className="text-xs sm:text-sm font-medium">{workshop.priceRange}</p>
                     <div className="flex flex-wrap gap-1">
                       {workshop.specialties.slice(0, 3).map((specialty, idx) => (
                         <Badge key={idx} variant="secondary" className="text-xs">
@@ -153,10 +163,10 @@ const ServiceDiscovery = () => {
                     </div>
                   </div>
                 </CardContent>
-              </Card>
+              </MobileOptimizedCard>
             </Link>
           ))}
-        </div>
+        </ResponsiveGrid>
       </div>
 
       <Footer />
