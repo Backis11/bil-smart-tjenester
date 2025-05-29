@@ -19,6 +19,7 @@ import ServiceRequestForm from "./components/ServiceRequestForm";
 import Documents from "./pages/Documents";
 import CarDetail from "./pages/CarDetail";
 import ResetPassword from "./pages/ResetPassword";
+import Blog from "./pages/Blog";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
             } />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/" element={<Index />} />
+            <Route path="/blog" element={<Blog />} />
             <Route path="/car/:id" element={
               <AuthGuard>
                 <div className="min-h-screen bg-gray-50">
