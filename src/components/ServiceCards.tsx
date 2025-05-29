@@ -9,7 +9,7 @@ import {
   Car,
   FileText,
   DollarSign,
-  Garage
+  Home
 } from "lucide-react";
 
 const ServiceCards = () => {
@@ -17,7 +17,7 @@ const ServiceCards = () => {
     {
       title: "Dine biler",
       description: "Se oversikt over alle dine registrerte biler",
-      icon: Garage,
+      icon: Home,
       link: "/documents",
       color: "bg-blue-50 text-blue-600",
       hoverColor: "hover:bg-blue-100"
