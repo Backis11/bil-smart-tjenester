@@ -12,6 +12,7 @@ import WorkshopDashboard from "./pages/WorkshopDashboard";
 import CarValuation from "./components/CarValuation";
 import ServiceDiscovery from "./components/ServiceDiscovery";
 import ServiceRequestForm from "./components/ServiceRequestForm";
+import Documents from "./pages/Documents";
 
 const queryClient = new QueryClient();
 
@@ -46,14 +47,7 @@ const App = () => (
               </div>
             </div>
           } />
-          <Route path="/documents" element={
-            <div className="min-h-screen bg-gray-50">
-              <div className="p-4">
-                <h1 className="text-2xl font-bold mb-4">Mine dokumenter</h1>
-                <p>Dokumentoversikt kommer snart...</p>
-              </div>
-            </div>
-          } />
+          <Route path="/documents" element={<Documents />} />
           <Route path="/sell-car" element={
             <div className="min-h-screen bg-gray-50">
               <div className="p-4">
