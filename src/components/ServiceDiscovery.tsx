@@ -55,7 +55,7 @@ const ServiceDiscovery = () => {
                 placeholder="Søk etter verksted, by eller tjeneste..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 text-gray-900 placeholder:text-gray-500"
+                className="pl-10 text-gray-900 placeholder:text-gray-500 bg-white"
               />
             </div>
             

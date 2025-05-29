@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -94,7 +95,7 @@ const Index = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <Input 
               placeholder="Søk etter verksted eller tjeneste..." 
-              className="pl-10 bg-white"
+              className="pl-10 bg-white text-gray-900 placeholder:text-gray-500"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   const searchTerm = (e.target as HTMLInputElement).value;

@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel
 } from "@/components/ui/dropdown-menu";
-import { Wrench, Building2, Bell, Settings, FileText, DollarSign, Clock } from "lucide-react";
+import { Wrench, Building2, Bell, Settings, FileText, DollarSign, Clock, User, LogOut } from "lucide-react";
 
 const Header = () => {
   const location = useLocation();
@@ -130,20 +130,38 @@ const Header = () => {
                     </DropdownMenuContent>
                   </DropdownMenu>
                   
-                  <Button variant="ghost" size="sm">
-                    <Settings className="h-4 w-4" />
-                  </Button>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src="" alt="Bruker" />
-                      <AvatarFallback className="bg-blue-100 text-blue-600">JD</AvatarFallback>
-                    </Avatar>
-                    <div className="hidden sm:block">
-                      <p className="text-sm font-medium text-gray-900">John Doe</p>
-                      <p className="text-xs text-gray-500">Toyota Corolla 2020</p>
-                    </div>
-                  </div>
+                  {/* User Menu with Settings */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="flex items-center space-x-2 p-1">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src="" alt="Bruker" />
+                          <AvatarFallback className="bg-blue-100 text-blue-600">JD</AvatarFallback>
+                        </Avatar>
+                        <div className="hidden sm:block text-left">
+                          <p className="text-sm font-medium text-gray-900">John Doe</p>
+                          <p className="text-xs text-gray-500">Toyota Corolla 2020</p>
+                        </div>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                      <DropdownMenuLabel>Min konto</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="cursor-pointer">
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Profil</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="cursor-pointer">
+                        <Settings className="mr-2 h-4 w-4" />
+                        <span>Innstillinger</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="cursor-pointer">
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Logg ut</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </>
             ) : (
