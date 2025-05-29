@@ -2,9 +2,11 @@
 import { useState } from "react";
 import { Wrench } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
 import SearchBar from "./header/SearchBar";
 import NotificationDropdown from "./header/NotificationDropdown";
-import UserMenu from "./header/UserMenu";
+import UserMenu from "./UserMenu";
 import MobileMenu from "./header/MobileMenu";
 
 const Header = () => {
@@ -12,6 +14,7 @@ const Header = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { user } = useAuth();
 
   // Don't show search bar on homepage since it has its own search in hero section
   const showSearchBar = location.pathname !== '/';
@@ -38,16 +41,29 @@ const Header = () => {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            <NotificationDropdown
-              isOpen={isNotificationOpen}
-              setIsOpen={setIsNotificationOpen}
-              onUserMenuClose={() => setIsUserMenuOpen(false)}
-            />
-            <UserMenu
-              isOpen={isUserMenuOpen}
-              setIsOpen={setIsUserMenuOpen}
-              onNotificationClose={() => setIsNotificationOpen(false)}
-            />
+            {user ? (
+              <>
+                <NotificationDropdown
+                  isOpen={isNotificationOpen}
+                  setIsOpen={setIsNotificationOpen}
+                  onUserMenuClose={() => setIsUserMenuOpen(false)}
+                />
+                <UserMenu
+                  isOpen={isUserMenuOpen}
+                  setIsOpen={setIsUserMenuOpen}
+                  onNotificationClose={() => setIsNotificationOpen(false)}
+                />
+              </>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <Button variant="ghost" asChild>
+                  <Link to="/auth?tab=login">Logg inn</Link>
+                </Button>
+                <Button asChild>
+                  <Link to="/auth?tab=register">Registrer deg</Link>
+                </Button>
+              </div>
+            )}
           </div>
 
           <MobileMenu
