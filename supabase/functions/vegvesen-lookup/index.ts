@@ -13,33 +13,94 @@ serve(async (req) => {
   }
 
   try {
+    console.log('=== VEGVESEN LOOKUP STARTED ===')
+    console.log('Request method:', req.method)
+    console.log('Request URL:', req.url)
+    
     const authHeader = req.headers.get('Authorization')
+    console.log('Auth header present:', !!authHeader)
+    console.log('Auth header value:', authHeader ? 'Bearer [REDACTED]' : 'None')
+    
     if (!authHeader) {
-      throw new Error('No authorization header')
+      console.error('❌ No authorization header found')
+      return new Response(
+        JSON.stringify({ error: 'No authorization header' }),
+        { 
+          status: 401, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
     }
 
+    console.log('🔄 Creating Supabase client...')
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       { global: { headers: { Authorization: authHeader } } }
     )
 
-    const { data: { user } } = await supabaseClient.auth.getUser()
-    if (!user) {
-      throw new Error('Unauthorized')
+    console.log('🔄 Getting user from auth...')
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser()
+    
+    if (authError) {
+      console.error('❌ Auth error:', authError)
+      return new Response(
+        JSON.stringify({ error: 'Authentication failed: ' + authError.message }),
+        { 
+          status: 401, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
     }
+    
+    if (!user) {
+      console.error('❌ No user found')
+      return new Response(
+        JSON.stringify({ error: 'User not authenticated' }),
+        { 
+          status: 401, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    console.log('✅ User authenticated:', user.email)
 
     const { licensePlate } = await req.json()
+    console.log('License plate to lookup:', licensePlate)
+    
     if (!licensePlate) {
-      throw new Error('License plate required')
+      console.error('❌ No license plate provided')
+      return new Response(
+        JSON.stringify({ error: 'License plate required' }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
     }
 
+    console.log('🔄 Checking API quota...')
     // Check API quota
-    const { data: quotaCheck } = await supabaseClient.rpc('check_api_quota', { 
+    const { data: quotaCheck, error: quotaError } = await supabaseClient.rpc('check_api_quota', { 
       user_uuid: user.id 
     })
     
+    if (quotaError) {
+      console.error('❌ Quota check error:', quotaError)
+      return new Response(
+        JSON.stringify({ error: 'Failed to check quota: ' + quotaError.message }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+    
+    console.log('Quota check result:', quotaCheck)
+    
     if (!quotaCheck) {
+      console.log('❌ Daily quota exceeded')
       await supabaseClient.rpc('log_vegvesen_api_call', {
         user_uuid: user.id,
         plate: licensePlate,
@@ -59,18 +120,29 @@ serve(async (req) => {
       )
     }
 
+    console.log('✅ Quota check passed, incrementing counter...')
     // Increment quota counter
-    await supabaseClient.rpc('increment_api_quota', { user_uuid: user.id })
+    const { error: incrementError } = await supabaseClient.rpc('increment_api_quota', { user_uuid: user.id })
+    if (incrementError) {
+      console.error('⚠️ Failed to increment quota:', incrementError)
+    }
 
     // Call Vegvesenet API
     const vegvesenApiKey = Deno.env.get('VEGVESEN_API_KEY')
     if (!vegvesenApiKey) {
-      throw new Error('Vegvesen API key not configured')
+      console.error('❌ Vegvesen API key not configured')
+      return new Response(
+        JSON.stringify({ error: 'Vegvesen API key not configured' }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
     }
 
     const vegvesenUrl = `https://www.vegvesen.no/ws/no/vegvesen/kjoretoy/felles/datautlevering/enkeltoppslag/kjoretoydata?kjennemerke=${licensePlate}`
     
-    console.log('Calling Vegvesen API:', vegvesenUrl)
+    console.log('🔄 Calling Vegvesen API:', vegvesenUrl)
     
     const vegvesenResponse = await fetch(vegvesenUrl, {
       headers: {
@@ -93,6 +165,7 @@ serve(async (req) => {
     })
 
     if (!vegvesenResponse.ok) {
+      console.error('❌ Vegvesen API error:', responseData)
       return new Response(
         JSON.stringify({ 
           error: 'Failed to fetch vehicle data from Vegvesenet',
@@ -108,6 +181,7 @@ serve(async (req) => {
     // Extract relevant data from Vegvesenet response
     const vehicleData = responseData.kjoretoydataListe?.[0]
     if (!vehicleData) {
+      console.log('❌ No vehicle data found in response')
       return new Response(
         JSON.stringify({ error: 'No vehicle data found for this license plate' }),
         { 
@@ -137,6 +211,7 @@ serve(async (req) => {
     }
 
     console.log('Formatted data:', JSON.stringify(formattedData, null, 2))
+    console.log('✅ VEGVESEN LOOKUP COMPLETED SUCCESSFULLY')
 
     return new Response(
       JSON.stringify(formattedData),
@@ -147,10 +222,14 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Error in vegvesen-lookup:', error)
+    console.error('❌ Error in vegvesen-lookup:', error)
+    console.error('Error stack:', error.stack)
     
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: 'Internal server error: ' + error.message,
+        stack: error.stack 
+      }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
