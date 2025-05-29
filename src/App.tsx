@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,6 +21,7 @@ import Documents from "./pages/Documents";
 import CarDetail from "./pages/CarDetail";
 import ResetPassword from "./pages/ResetPassword";
 import Blog from "./pages/Blog";
+import AddCar from "./pages/AddCar";
 
 const queryClient = new QueryClient();
 
@@ -102,12 +102,7 @@ const App = () => (
             } />
             <Route path="/add-car" element={
               <AuthGuard>
-                <div className="min-h-screen bg-gray-50">
-                  <div className="p-4">
-                    <h1 className="text-2xl font-bold mb-4">Legg til bil</h1>
-                    <p>Registreringsskjema kommer snart...</p>
-                  </div>
-                </div>
+                <AddCar />
               </AuthGuard>
             } />
             <Route path="/workshop-login" element={<WorkshopAuth />} />
