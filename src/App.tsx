@@ -10,13 +10,15 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import WorkshopDetail from "./pages/WorkshopDetail";
-import WorkshopLogin from "./pages/WorkshopLogin";
+import WorkshopAuth from "./pages/WorkshopAuth";
+import WorkshopRegister from "./pages/WorkshopRegister";
 import WorkshopDashboard from "./pages/WorkshopDashboard";
 import CarValuation from "./components/CarValuation";
 import ServiceDiscovery from "./components/ServiceDiscovery";
 import ServiceRequestForm from "./components/ServiceRequestForm";
 import Documents from "./pages/Documents";
 import CarDetail from "./pages/CarDetail";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +35,7 @@ const App = () => (
                 <Auth />
               </AuthGuard>
             } />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/" element={<Index />} />
             <Route path="/car/:id" element={
               <AuthGuard>
@@ -93,8 +96,13 @@ const App = () => (
                 </div>
               </AuthGuard>
             } />
-            <Route path="/workshop-login" element={<WorkshopLogin />} />
-            <Route path="/workshop-dashboard" element={<WorkshopDashboard />} />
+            <Route path="/workshop-login" element={<WorkshopAuth />} />
+            <Route path="/workshop-register" element={<WorkshopRegister />} />
+            <Route path="/workshop-dashboard" element={
+              <AuthGuard>
+                <WorkshopDashboard />
+              </AuthGuard>
+            } />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
