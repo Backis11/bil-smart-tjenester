@@ -229,22 +229,40 @@ serve(async (req) => {
       vin = kjoretoyId.understellsnummer;
     }
     
-    // Extract fuel type - check multiple sources
+    // Extract fuel type - improved logic with multiple sources
     let fuelType = '';
     if (motorData?.drivstoff?.[0]?.drivstoffKode?.beskrivelse) {
       fuelType = motorData.drivstoff[0].drivstoffKode.beskrivelse;
+    } else if (motorData?.drivstoff?.[0]?.drivstoffKode?.kodeNavn) {
+      fuelType = motorData.drivstoff[0].drivstoffKode.kodeNavn;
     } else if (motorData?.motor?.drivstoffKode?.beskrivelse) {
       fuelType = motorData.motor.drivstoffKode.beskrivelse;
-    } else if (make === 'TESLA') {
-      fuelType = 'Elektrisk'; // Default for Tesla vehicles
+    } else if (motorData?.motor?.drivstoffKode?.kodeNavn) {
+      fuelType = motorData.motor.drivstoffKode.kodeNavn;
+    } else if (vehicleData.godkjenning?.tekniskGodkjenning?.tekniskeData?.motorOgDrivverk) {
+      // Check if we can find fuel type in the motor data structure
+      const allMotorData = vehicleData.godkjenning.tekniskGodkjenning.tekniskeData.motorOgDrivverk;
+      for (const motor of allMotorData) {
+        if (motor.drivstoff?.[0]?.drivstoffKode?.beskrivelse) {
+          fuelType = motor.drivstoff[0].drivstoffKode.beskrivelse;
+          break;
+        }
+      }
     }
     
-    // Extract engine size
+    // Special handling for known electric vehicles
+    if (!fuelType && (make === 'TESLA' || model?.toLowerCase().includes('electric') || model?.toLowerCase().includes('ev'))) {
+      fuelType = 'Elektrisk';
+    }
+    
+    // Extract engine size or power
     let engineSize = '';
     if (motorData?.motor?.slagvolum) {
       engineSize = `${motorData.motor.slagvolum}L`;
     } else if (motorData?.effekt) {
-      engineSize = `${motorData.effekt}kW`; // For electric vehicles
+      engineSize = `${motorData.effekt}kW`;
+    } else if (motorData?.motor?.maksEffekt) {
+      engineSize = `${motorData.motor.maksEffekt}kW`;
     }
 
     const formattedData = {

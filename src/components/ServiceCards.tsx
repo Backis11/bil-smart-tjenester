@@ -8,50 +8,59 @@ import {
   Wrench, 
   Car,
   FileText,
-  DollarSign
+  DollarSign,
+  Garage
 } from "lucide-react";
 
 const ServiceCards = () => {
   const services = [
     {
+      title: "Dine biler",
+      description: "Se oversikt over alle dine registrerte biler",
+      icon: Garage,
+      link: "/documents",
+      color: "bg-blue-50 text-blue-600",
+      hoverColor: "hover:bg-blue-100"
+    },
+    {
       title: "Verdivurdering",
       description: "Få en nøyaktig vurdering av bilens verdi",
       icon: Calculator,
       link: "/valuation",
-      color: "bg-blue-50 text-blue-600",
-      hoverColor: "hover:bg-blue-100"
+      color: "bg-green-50 text-green-600",
+      hoverColor: "hover:bg-green-100"
     },
     {
       title: "EU-kontroll",
       description: "Book time for EU-kontroll hos godkjente verksteder",
       icon: FileCheck,
       link: "/services?service=eu-kontroll",
-      color: "bg-green-50 text-green-600",
-      hoverColor: "hover:bg-green-100"
+      color: "bg-orange-50 text-orange-600",
+      hoverColor: "hover:bg-orange-100"
     },
     {
       title: "Service og reparasjon",
       description: "Finn verksted og få tilbud på service",
       icon: Wrench,
       link: "/get-quote",
-      color: "bg-orange-50 text-orange-600",
-      hoverColor: "hover:bg-orange-100"
+      color: "bg-purple-50 text-purple-600",
+      hoverColor: "hover:bg-purple-100"
     },
     {
       title: "Registrer ny bil",
       description: "Legg til en ny bil i din digitale bilmappe",
       icon: Car,
       link: "/add-car",
-      color: "bg-purple-50 text-purple-600",
-      hoverColor: "hover:bg-purple-100"
+      color: "bg-indigo-50 text-indigo-600",
+      hoverColor: "hover:bg-indigo-100"
     },
     {
       title: "Mine dokumenter",
       description: "Se alle dokumenter og historikk for dine biler",
       icon: FileText,
       link: "/documents",
-      color: "bg-indigo-50 text-indigo-600",
-      hoverColor: "hover:bg-indigo-100"
+      color: "bg-teal-50 text-teal-600",
+      hoverColor: "hover:bg-teal-100"
     },
     {
       title: "Selg bil",
