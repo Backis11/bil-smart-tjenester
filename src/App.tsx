@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,6 +12,7 @@ import CarValuation from "./components/CarValuation";
 import ServiceDiscovery from "./components/ServiceDiscovery";
 import ServiceRequestForm from "./components/ServiceRequestForm";
 import Documents from "./pages/Documents";
+import CarDetail from "./pages/CarDetail";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +24,11 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/car/:id" element={
+            <div className="min-h-screen bg-gray-50">
+              <CarDetail />
+            </div>
+          } />
           <Route path="/valuation" element={
             <div className="min-h-screen bg-gray-50">
               <div className="p-4">

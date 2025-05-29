@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -30,18 +29,24 @@ const Index = () => {
 
   const cars = [
     { 
+      id: 1,
       brand: "Toyota", 
       model: "Corolla", 
       plate: "AB12345", 
       euControl: "45 dager",
-      status: "Grønn"
+      status: "Grønn",
+      year: 2020,
+      mileage: 45000
     },
     { 
+      id: 2,
       brand: "Volkswagen", 
       model: "Golf", 
       plate: "CD67890", 
       euControl: "12 dager",
-      status: "Gul"
+      status: "Gul",
+      year: 2019,
+      mileage: 62000
     }
   ];
 
@@ -134,25 +139,27 @@ const Index = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {cars.map((car, index) => (
-              <Card key={index} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="font-bold text-lg">{car.brand} {car.model}</h3>
-                      <p className="text-gray-600">{car.plate}</p>
+            {cars.map((car) => (
+              <Link key={car.id} to={`/car/${car.id}`}>
+                <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                  <CardContent className="p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="font-bold text-lg">{car.brand} {car.model}</h3>
+                        <p className="text-gray-600">{car.plate}</p>
+                      </div>
+                      <Badge variant={car.status === "Grønn" ? "default" : "secondary"}>
+                        {car.status}
+                      </Badge>
                     </div>
-                    <Badge variant={car.status === "Grønn" ? "default" : "secondary"}>
-                      {car.status}
-                    </Badge>
-                  </div>
-                  
-                  <div className="flex items-center text-sm text-gray-600">
-                    <Clock className="h-4 w-4 mr-1" />
-                    <span>Neste EU-kontroll: {car.euControl}</span>
-                  </div>
-                </CardContent>
-              </Card>
+                    
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Clock className="h-4 w-4 mr-1" />
+                      <span>Neste EU-kontroll: {car.euControl}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         </section>
