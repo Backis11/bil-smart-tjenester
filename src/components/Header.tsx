@@ -76,8 +76,8 @@ const Header = () => {
             </div>
           </Link>
 
-          {/* Desktop Search */}
-          <div className="hidden md:flex flex-1 max-w-lg mx-8">
+          {/* Desktop Search - Only visible on desktop */}
+          <div className="hidden lg:flex flex-1 max-w-lg mx-8">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
@@ -196,12 +196,12 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu - Only show search if desktop search is hidden */}
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-gray-200 bg-white">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              {/* Mobile Search */}
-              <div className="relative">
+              {/* Mobile Search - Only visible when desktop search is hidden */}
+              <div className="relative lg:hidden">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
                   placeholder="Søk etter verksted eller tjeneste..."
