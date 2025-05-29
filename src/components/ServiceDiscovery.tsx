@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +14,7 @@ import {
 import { Link, useSearchParams } from "react-router-dom";
 import { allWorkshops } from "@/data/workshops";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 const ServiceDiscovery = () => {
   const [searchParams] = useSearchParams();
@@ -158,6 +158,8 @@ const ServiceDiscovery = () => {
           ))}
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 };
