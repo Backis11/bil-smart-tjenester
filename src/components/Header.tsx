@@ -16,8 +16,8 @@ const Header = () => {
   const location = useLocation();
   const { user } = useAuth();
 
-  // Don't show search bar on homepage since it has its own search in hero section
-  const showSearchBar = location.pathname !== '/';
+  // Show search bar when user is logged in OR when not on homepage
+  const showSearchBar = user || location.pathname !== '/';
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -32,7 +32,7 @@ const Header = () => {
             </div>
           </Link>
 
-          {/* Desktop Search - Only visible on desktop and when not on homepage */}
+          {/* Desktop Search - Only visible on desktop and when conditions are met */}
           {showSearchBar && (
             <div className="hidden lg:flex flex-1 max-w-lg mx-8">
               <SearchBar className="w-full" />
