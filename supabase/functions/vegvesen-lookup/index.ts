@@ -196,6 +196,10 @@ serve(async (req) => {
     const registrering = vehicleData.forstegangsregistrering || vehicleData.registrering;
     const motorData = vehicleData.godkjenning?.tekniskGodkjenning?.tekniskeData?.motorOgDrivverk?.[0];
     const kjoretoyId = vehicleData.kjoretoyId;
+    const periodiskKontroll = vehicleData.periodiskKjoretoyKontroll;
+    const karosseriOgLasteplan = vehicleData.godkjenning?.tekniskGodkjenning?.tekniskeData?.karosseriOgLasteplan;
+    const dekkOgFelg = vehicleData.godkjenning?.tekniskGodkjenning?.tekniskeData?.dekkOgFelg;
+    const miljodata = vehicleData.godkjenning?.tekniskGodkjenning?.tekniskeData?.miljodata;
     
     // Extract make (merke) - prioritize actual brand over vehicle category
     let make = '';
@@ -265,6 +269,56 @@ serve(async (req) => {
       engineSize = `${motorData.motor.maksEffekt}kW`;
     }
 
+    // Extract EU-kontroll information
+    let inspectionDueDate = null;
+    if (periodiskKontroll?.kontrollfrist) {
+      inspectionDueDate = periodiskKontroll.kontrollfrist;
+    }
+
+    // Extract weight information
+    let ownWeight = null;
+    let totalWeight = null;
+    if (karosseriOgLasteplan?.egenvekt) {
+      ownWeight = karosseriOgLasteplan.egenvekt;
+    }
+    if (karosseriOgLasteplan?.tekniskTillattTotalvekt) {
+      totalWeight = karosseriOgLasteplan.tekniskTillattTotalvekt;
+    }
+
+    // Extract tire and rim dimensions
+    let tireDimensions = '';
+    let rimDimensions = '';
+    if (dekkOgFelg?.length > 0) {
+      const primary = dekkOgFelg[0];
+      if (primary.dekkdimensjon) {
+        tireDimensions = primary.dekkdimensjon;
+      }
+      if (primary.felgdimensjon) {
+        rimDimensions = primary.felgdimensjon;
+      }
+    }
+
+    // Extract horsepower and CO2 emissions
+    let horsePower = null;
+    let co2Emissions = null;
+    
+    if (motorData?.motor?.maksEffekt) {
+      // Convert kW to horsepower (1 kW = 1.36 hp approximately)
+      horsePower = Math.round(motorData.motor.maksEffekt * 1.36);
+    }
+    
+    if (miljodata?.co2Utslipp) {
+      co2Emissions = miljodata.co2Utslipp;
+    }
+
+    // Extract technical approval date
+    let technicalApprovalDate = null;
+    if (vehicleData.godkjenning?.tekniskGodkjenning?.gyldigFraDato) {
+      technicalApprovalDate = vehicleData.godkjenning.tekniskGodkjenning.gyldigFraDato;
+    } else if (vehicleData.godkjenning?.godkjenningsDato) {
+      technicalApprovalDate = vehicleData.godkjenning.godkjenningsDato;
+    }
+
     const formattedData = {
       licensePlate: licensePlate,
       make: make,
@@ -274,8 +328,14 @@ serve(async (req) => {
       fuelType: fuelType,
       engineSize: engineSize,
       registrationDate: registrering?.registrertForstegangNorgeDato || registrering?.forstegangRegistrertDato || null,
-      technicalApprovalDate: vehicleData.godkjenning?.tekniskGodkjenning?.gyldigFraDato || vehicleData.godkjenning?.godkjenningsDato || null,
-      inspectionDueDate: vehicleData.periodiskKjoretoyKontroll?.kontrollfrist || null
+      technicalApprovalDate: technicalApprovalDate,
+      inspectionDueDate: inspectionDueDate,
+      ownWeight: ownWeight,
+      totalWeight: totalWeight,
+      tireDimensions: tireDimensions,
+      rimDimensions: rimDimensions,
+      horsePower: horsePower,
+      co2Emissions: co2Emissions
     }
 
     console.log('📋 Extracted data summary:')
@@ -285,6 +345,13 @@ serve(async (req) => {
     console.log('- Fuel type:', fuelType)
     console.log('- Engine size:', engineSize)
     console.log('- VIN:', vin)
+    console.log('- EU-kontroll due:', inspectionDueDate)
+    console.log('- Own weight:', ownWeight)
+    console.log('- Total weight:', totalWeight)
+    console.log('- Tire dimensions:', tireDimensions)
+    console.log('- Rim dimensions:', rimDimensions)
+    console.log('- Horsepower:', horsePower)
+    console.log('- CO2 emissions:', co2Emissions)
     
     console.log('✅ VEGVESEN LOOKUP COMPLETED SUCCESSFULLY')
 

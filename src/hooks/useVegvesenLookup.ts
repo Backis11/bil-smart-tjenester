@@ -15,6 +15,12 @@ interface VehicleData {
   registrationDate: string | null;
   technicalApprovalDate: string | null;
   inspectionDueDate: string | null;
+  ownWeight: number | null;
+  totalWeight: number | null;
+  tireDimensions: string;
+  rimDimensions: string;
+  horsePower: number | null;
+  co2Emissions: number | null;
 }
 
 export const useVegvesenLookup = () => {

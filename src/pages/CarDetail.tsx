@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,13 +6,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { 
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { 
   ArrowLeft, 
   Save, 
   Car, 
   Calendar, 
   Gauge,
   FileText,
-  Shield
+  Shield,
+  AlertTriangle,
+  Info
 } from "lucide-react";
 import Header from "@/components/Header";
 import { useToast } from "@/hooks/use-toast";
@@ -34,7 +41,15 @@ const CarDetail = () => {
     status: "Grønn",
     vin: "JTDKN3DU2L0123456",
     color: "Hvit",
-    fuelType: "Bensin"
+    fuelType: "Bensin",
+    // Extended data from Vegvesen API
+    technicalApprovalDate: "2020-01-15",
+    ownWeight: 1320,
+    totalWeight: 1800,
+    tireDimensions: "205/55R16",
+    rimDimensions: "6.5Jx16",
+    horsePower: 122,
+    co2Emissions: 142
   });
 
   const [editMode, setEditMode] = useState(false);
@@ -53,6 +68,18 @@ const CarDetail = () => {
     setFormData(carData);
     setEditMode(false);
   };
+
+  // Calculate days until EU-kontroll
+  const daysUntilEUControl = () => {
+    const today = new Date();
+    const euDate = new Date(carData.euControl);
+    const diffTime = euDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  const daysLeft = daysUntilEUControl();
+  const isEUControlSoon = daysLeft <= 60;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -78,9 +105,33 @@ const CarDetail = () => {
           </Badge>
         </div>
 
+        {/* EU-kontroll warning */}
+        {isEUControlSoon && (
+          <Card className="mb-6 border-orange-200 bg-orange-50">
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-3">
+                <AlertTriangle className="h-5 w-5 text-orange-600" />
+                <div>
+                  <p className="font-medium text-orange-800">
+                    EU-kontroll nærmer seg
+                  </p>
+                  <p className="text-sm text-orange-600">
+                    {daysLeft > 0 ? `${daysLeft} dager igjen` : 'Fristen har gått ut'}
+                  </p>
+                </div>
+                <Link to="/services?service=eu-kontroll" className="ml-auto">
+                  <Button size="sm" variant="outline" className="border-orange-300 text-orange-700 hover:bg-orange-100">
+                    Book EU-kontroll
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Car Information */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center space-x-2">
@@ -182,6 +233,61 @@ const CarDetail = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Extended Technical Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Info className="h-5 w-5" />
+                  <span>Tekniske detaljer</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="technical-specs">
+                    <AccordionTrigger>Se alle tekniske spesifikasjoner</AccordionTrigger>
+                    <AccordionContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                        <div>
+                          <Label className="text-sm font-medium text-gray-600">Teknisk godkjenning</Label>
+                          <p className="text-sm">{new Date(carData.technicalApprovalDate).toLocaleDateString('no-NO')}</p>
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium text-gray-600">Egenvekt</Label>
+                          <p className="text-sm">{carData.ownWeight} kg</p>
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium text-gray-600">Totalvekt</Label>
+                          <p className="text-sm">{carData.totalWeight} kg</p>
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium text-gray-600">Motoreffekt</Label>
+                          <p className="text-sm">{carData.horsePower} hk</p>
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium text-gray-600">CO₂-utslipp</Label>
+                          <p className="text-sm">{carData.co2Emissions} g/km</p>
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium text-gray-600">Dekkdimensjon</Label>
+                          <p className="text-sm">{carData.tireDimensions}</p>
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium text-gray-600">Felgdimensjon</Label>
+                          <p className="text-sm">{carData.rimDimensions}</p>
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium text-gray-600">Neste EU-kontroll</Label>
+                          <p className={`text-sm ${isEUControlSoon ? 'text-orange-600 font-medium' : ''}`}>
+                            {new Date(carData.euControl).toLocaleDateString('no-NO')}
+                          </p>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Quick Actions */}
@@ -224,13 +330,19 @@ const CarDetail = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Neste EU-kontroll</span>
-                  <span className="font-medium">45 dager</span>
+                  <span className={`font-medium ${isEUControlSoon ? 'text-orange-600' : ''}`}>
+                    {daysLeft > 0 ? `${daysLeft} dager` : 'Utgått'}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Status</span>
                   <Badge variant={carData.status === "Grønn" ? "default" : "secondary"}>
                     {carData.status}
                   </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Motoreffekt</span>
+                  <span className="font-medium">{carData.horsePower} hk</span>
                 </div>
               </CardContent>
             </Card>
