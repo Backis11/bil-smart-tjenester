@@ -8,20 +8,11 @@ import {
   Wrench, 
   Car,
   FileText,
-  DollarSign,
-  Home
+  DollarSign
 } from "lucide-react";
 
 const ServiceCards = () => {
   const services = [
-    {
-      title: "Dine biler",
-      description: "Se oversikt over alle dine registrerte biler",
-      icon: Home,
-      link: "/documents",
-      color: "bg-blue-50 text-blue-600",
-      hoverColor: "hover:bg-blue-100"
-    },
     {
       title: "Verdivurdering",
       description: "Få en nøyaktig vurdering av bilens verdi",
@@ -73,44 +64,42 @@ const ServiceCards = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Din digitale bilmappe
-          </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Velg en tjeneste for å komme i gang
-          </p>
-        </div>
+    <div>
+      <div className="text-center mb-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          Hva skal du i dag?
+        </h2>
+        <p className="text-gray-600">
+          Velg en tjeneste for å komme i gang
+        </p>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {services.map((service, index) => (
-            <Link key={index} to={service.link}>
-              <Card className={`hover:shadow-lg transition-all duration-200 cursor-pointer ${service.hoverColor} h-full`}>
-                <CardContent className="p-6 text-center">
-                  <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${service.color}`}>
-                    <service.icon className="h-8 w-8" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    {service.title}
-                  </h3>
-                  <p className="text-gray-600">
-                    {service.description}
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        {services.map((service, index) => (
+          <Link key={index} to={service.link}>
+            <Card className={`hover:shadow-lg transition-all duration-200 cursor-pointer ${service.hoverColor} h-full`}>
+              <CardContent className="p-6 text-center">
+                <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${service.color}`}>
+                  <service.icon className="h-8 w-8" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  {service.title}
+                </h3>
+                <p className="text-gray-600">
+                  {service.description}
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
+      </div>
 
-        <div className="text-center">
-          <Button variant="outline" size="lg" asChild>
-            <Link to="/services">
-              Finn verksted
-            </Link>
-          </Button>
-        </div>
+      <div className="text-center">
+        <Button variant="outline" size="lg" asChild>
+          <Link to="/services">
+            Finn verksted
+          </Link>
+        </Button>
       </div>
     </div>
   );
