@@ -9,6 +9,8 @@ import AuthGuard from "@/components/AuthGuard";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
 import WorkshopDetail from "./pages/WorkshopDetail";
 import WorkshopAuth from "./pages/WorkshopAuth";
 import WorkshopRegister from "./pages/WorkshopRegister";
@@ -39,6 +41,16 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/" element={<Index />} />
             <Route path="/blog" element={<Blog />} />
+            <Route path="/profile" element={
+              <AuthGuard>
+                <Profile />
+              </AuthGuard>
+            } />
+            <Route path="/settings" element={
+              <AuthGuard>
+                <Settings />
+              </AuthGuard>
+            } />
             <Route path="/car/:id" element={
               <AuthGuard>
                 <div className="min-h-screen bg-gray-50">
