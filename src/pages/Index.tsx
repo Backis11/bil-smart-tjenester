@@ -1,189 +1,197 @@
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Search, Car, Settings, FileText, PlusCircle, TrendingUp, MapPin } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Search, 
+  Wrench, 
+  FileText, 
+  Car, 
+  ShoppingCart, 
+  DollarSign,
+  MapPin,
+  Star,
+  Clock,
+  Shield
+} from "lucide-react";
+import { Link } from "react-router-dom";
+import Header from "@/components/Header";
 
 const Index = () => {
-  const actionCards = [
-    { icon: Settings, title: 'Service', color: 'bg-blue-500', href: '/services' },
-    { icon: Car, title: 'EU-kontroll', color: 'bg-green-500', href: '/services?filter=EU-kontroll' },
-    { icon: Settings, title: 'Vaske bil', color: 'bg-purple-500', href: '/services?filter=Bilbvask' },
-    { icon: FileText, title: 'Dokumenter', color: 'bg-orange-500', href: '/documents' },
-    { icon: PlusCircle, title: 'Få tilbud', color: 'bg-red-500', href: '/get-quote' },
-    { icon: TrendingUp, title: 'Selg bil', color: 'bg-indigo-500', href: '/sell-car' },
-    { icon: TrendingUp, title: 'Verdivurdering', color: 'bg-emerald-500', href: '/valuation' },
+  const services = [
+    { title: "Service", icon: Wrench, description: "Få service på bilen din", color: "bg-blue-100 text-blue-600" },
+    { title: "EU-kontroll", icon: Shield, description: "Book EU-kontroll", color: "bg-green-100 text-green-600" },
+    { title: "Dokumenter", icon: FileText, description: "Se alle bilpapirer", color: "bg-purple-100 text-purple-600" },
+    { title: "Få tilbud", icon: ShoppingCart, description: "Sammenlign priser", color: "bg-orange-100 text-orange-600" },
+    { title: "Verdivurdering", icon: DollarSign, description: "Se bilens verdi", color: "bg-yellow-100 text-yellow-600" },
+    { title: "Selg bil", icon: Car, description: "Selg din bil enkelt", color: "bg-red-100 text-red-600" },
   ];
 
-  const nearbyWorkshops = [
-    { id: 1, name: 'Olsens Bil', rating: 4.8, distance: '0.5 km', price: 'Fra 850 kr' },
-    { id: 2, name: 'Service Express', rating: 4.6, distance: '1.2 km', price: 'Fra 750 kr' },
-    { id: 3, name: 'Auto Nordica', rating: 4.9, distance: '2.1 km', price: 'Fra 920 kr' },
+  const cars = [
+    { 
+      brand: "Toyota", 
+      model: "Corolla", 
+      plate: "AB12345", 
+      euControl: "45 dager",
+      status: "Grønn"
+    },
+    { 
+      brand: "Volkswagen", 
+      model: "Golf", 
+      plate: "CD67890", 
+      euControl: "12 dager",
+      status: "Gul"
+    }
   ];
 
-  const userCars = [
-    { id: 1, plate: 'AB12345', brand: 'Toyota', model: 'Corolla', euControlDays: 45 },
-    { id: 2, plate: 'CD67890', brand: 'BMW', model: 'X3', euControlDays: 120 },
+  const workshops = [
+    {
+      id: 1,
+      name: "Olsens Bil AS",
+      rating: 4.8,
+      distance: "0.5 km",
+      priceRange: "Fra 850 kr",
+      specialties: ["Toyota", "Volkswagen"],
+      image: "/api/placeholder/80/80"
+    },
+    {
+      id: 2,
+      name: "Service Express",
+      rating: 4.6,
+      distance: "1.2 km", 
+      priceRange: "Fra 750 kr",
+      specialties: ["Lakkreparatur", "Kollisjon"],
+      image: "/api/placeholder/80/80"
+    },
+    {
+      id: 3,
+      name: "Auto Nordica",
+      rating: 4.9,
+      distance: "2.1 km",
+      priceRange: "Fra 920 kr", 
+      specialties: ["BMW", "Mercedes", "Audi"],
+      image: "/api/placeholder/80/80"
+    }
   ];
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">God morgen, Ola</h1>
-              <p className="text-gray-600">Hva skal du i dag?</p>
-            </div>
-            <Link to="/profile" className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold hover:bg-blue-600 transition-colors">
-              O
-            </Link>
+      <Header />
+      
+      {/* Hero Section */}
+      <div className="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <h1 className="text-4xl font-bold mb-4">Velkommen til Wrench</h1>
+          <p className="text-xl opacity-90 mb-8">Din digitale bilmappe - alt du trenger for bilens vedlikehold</p>
+          
+          <div className="max-w-md mx-auto relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Input 
+              placeholder="Søk etter verksted eller tjeneste..." 
+              className="pl-10 bg-white"
+            />
           </div>
         </div>
       </div>
 
-      <div className="px-4 py-6 space-y-6">
-        {/* Search Bar */}
-        <div className="relative">
-          <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-          <Input 
-            placeholder="Søk etter verksted eller tjeneste"
-            className="pl-10 h-12 bg-white rounded-xl border-gray-200"
-            onClick={() => window.location.href = '/services'}
-          />
-        </div>
-
-        {/* Action Cards Grid */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Tjenester</h2>
-          <div className="grid grid-cols-2 gap-3">
-            {actionCards.map((card, index) => (
-              <Link key={index} to={card.href}>
-                <Card className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
-                  <CardContent className="p-4 flex flex-col items-center text-center space-y-2">
-                    <div className={`w-12 h-12 ${card.color} rounded-xl flex items-center justify-center`}>
-                      <card.icon className="h-6 w-6 text-white" />
-                    </div>
-                    <span className="text-sm font-medium text-gray-900">{card.title}</span>
-                  </CardContent>
-                </Card>
-              </Link>
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Quick Actions */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Hva skal du i dag?</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {services.map((service, index) => (
+              <Card key={index} className="hover:shadow-md transition-shadow cursor-pointer">
+                <CardContent className="p-6 text-center">
+                  <div className={`w-12 h-12 ${service.color} rounded-full flex items-center justify-center mx-auto mb-3`}>
+                    <service.icon className="h-6 w-6" />
+                  </div>
+                  <h3 className="font-semibold text-sm mb-1">{service.title}</h3>
+                  <p className="text-xs text-gray-500">{service.description}</p>
+                </CardContent>
+              </Card>
             ))}
           </div>
-        </div>
+        </section>
 
-        {/* My Cars Section */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Mine biler</h2>
-            <Link to="/cars">
-              <Button variant="ghost" size="sm" className="text-blue-600">
-                Se alle
-              </Button>
+        {/* My Cars */}
+        <section className="mb-12">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">Mine biler</h2>
+            <Link to="/add-car">
+              <Button variant="outline" size="sm">Legg til bil</Button>
             </Link>
           </div>
-          <div className="space-y-3">
-            {userCars.map((car, index) => (
-              <Link key={index} to={`/cars/${car.id}`}>
-                <Card className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                          <Car className="h-6 w-6 text-gray-600" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900">{car.brand} {car.model}</p>
-                          <p className="text-sm text-gray-600">{car.plate}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium text-gray-900">
-                          Neste EU-kontroll
-                        </p>
-                        <p className={`text-sm ${car.euControlDays < 60 ? 'text-red-600' : 'text-green-600'}`}>
-                          {car.euControlDays} dager
-                        </p>
-                      </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {cars.map((car, index) => (
+              <Card key={index} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className="font-bold text-lg">{car.brand} {car.model}</h3>
+                      <p className="text-gray-600">{car.plate}</p>
                     </div>
-                  </CardContent>
-                </Card>
-              </Link>
+                    <Badge variant={car.status === "Grønn" ? "default" : "secondary"}>
+                      {car.status}
+                    </Badge>
+                  </div>
+                  
+                  <div className="flex items-center text-sm text-gray-600">
+                    <Clock className="h-4 w-4 mr-1" />
+                    <span>Neste EU-kontroll: {car.euControl}</span>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
-        </div>
+        </section>
 
-        {/* Nearby Workshops */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Beste verksteder nær deg</h2>
+        {/* Best Workshops */}
+        <section>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">Beste verksteder nær deg</h2>
             <Link to="/services">
-              <Button variant="ghost" size="sm" className="text-blue-600">
-                Se alle
-              </Button>
+              <Button variant="outline" size="sm">Se alle</Button>
             </Link>
           </div>
-          <div className="flex space-x-4 overflow-x-auto pb-2">
-            {nearbyWorkshops.map((workshop, index) => (
-              <Link key={index} to={`/workshop/${workshop.id}`}>
-                <Card className="flex-shrink-0 w-64 border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
-                  <CardContent className="p-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-medium text-gray-900">{workshop.name}</h3>
-                        <div className="flex items-center space-x-1">
-                          <span className="text-yellow-500">★</span>
-                          <span className="text-sm text-gray-600">{workshop.rating}</span>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {workshops.map((workshop) => (
+              <Link key={workshop.id} to={`/workshop/${workshop.id}`}>
+                <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardContent className="p-6">
+                    <div className="flex items-start space-x-4">
+                      <img 
+                        src={workshop.image} 
+                        alt={workshop.name}
+                        className="w-16 h-16 rounded-lg object-cover"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-lg mb-1 truncate">{workshop.name}</h3>
+                        <div className="flex items-center mb-2">
+                          <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                          <span className="text-sm text-gray-600 ml-1">{workshop.rating}</span>
+                          <span className="text-gray-400 mx-1">•</span>
+                          <MapPin className="h-3 w-3 text-gray-400" />
+                          <span className="text-sm text-gray-600 ml-1">{workshop.distance}</span>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">{workshop.priceRange}</p>
+                        <div className="flex flex-wrap gap-1">
+                          {workshop.specialties.slice(0, 2).map((specialty, idx) => (
+                            <Badge key={idx} variant="secondary" className="text-xs">
+                              {specialty}
+                            </Badge>
+                          ))}
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2 text-sm text-gray-600">
-                        <MapPin className="h-4 w-4" />
-                        <span>{workshop.distance}</span>
-                      </div>
-                      <p className="text-sm font-medium text-green-600">{workshop.price}</p>
                     </div>
                   </CardContent>
                 </Card>
               </Link>
             ))}
           </div>
-        </div>
-
-        {/* Add Car Button */}
-        <Link to="/cars/add">
-          <Card className="border-2 border-dashed border-gray-300 hover:border-blue-500 transition-colors cursor-pointer">
-            <CardContent className="p-6 text-center">
-              <PlusCircle className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-              <p className="text-gray-600 font-medium">Legg til bil</p>
-              <p className="text-sm text-gray-500">Få tilpassede anbefalinger</p>
-            </CardContent>
-          </Card>
-        </Link>
-      </div>
-
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-        <div className="grid grid-cols-4 py-2">
-          {[
-            { icon: 'home', label: 'Hjem', active: true, href: '/' },
-            { icon: 'search', label: 'Søk', active: false, href: '/services' },
-            { icon: 'file', label: 'Bookinger', active: false, href: '/bookings' },
-            { icon: 'user', label: 'Profil', active: false, href: '/profile' },
-          ].map((item, index) => (
-            <Link key={index} to={item.href} className="flex flex-col items-center py-2 px-1">
-              <div className={`w-6 h-6 mb-1 ${item.active ? 'text-blue-600' : 'text-gray-400'}`}>
-                {/* Icon placeholder */}
-                <div className="w-full h-full bg-current rounded" style={{ opacity: 0.3 }} />
-              </div>
-              <span className={`text-xs ${item.active ? 'text-blue-600' : 'text-gray-400'}`}>
-                {item.label}
-              </span>
-            </Link>
-          ))}
-        </div>
+        </section>
       </div>
     </div>
   );
