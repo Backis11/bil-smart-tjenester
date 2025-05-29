@@ -1,12 +1,28 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Camera, Calendar, Car, MapPin, FileText } from 'lucide-react';
+import { Camera, Calendar, Car, MapPin, FileText, Plus } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { Link } from 'react-router-dom';
+
+interface UserCar {
+  id: string;
+  make: string;
+  model: string;
+  year: number;
+  license_plate: string;
+}
 
 const ServiceRequestForm = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [cars, setCars] = useState<UserCar[]>([]);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     serviceType: '',
     car: '',
@@ -15,6 +31,34 @@ const ServiceRequestForm = () => {
     location: '',
     images: []
   });
+
+  useEffect(() => {
+    const fetchUserCars = async () => {
+      if (!user) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('cars')
+          .select('id, make, model, year, license_plate')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setCars(data || []);
+      } catch (error) {
+        console.error('Error fetching cars:', error);
+        toast({
+          title: "Feil",
+          description: "Kunne ikke hente dine biler",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserCars();
+  }, [user]);
 
   const serviceTypes = [
     { id: 'service', name: 'Service', icon: '🔧' },
@@ -25,16 +69,35 @@ const ServiceRequestForm = () => {
     { id: 'other', name: 'Annet', icon: '❓' },
   ];
 
-  const userCars = [
-    { id: 1, name: 'Toyota Corolla (AB12345)', year: 2020 },
-    { id: 2, name: 'BMW X3 (CD67890)', year: 2018 },
-  ];
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!formData.serviceType || !formData.car || !formData.description) {
+      toast({
+        title: "Feil",
+        description: "Vennligst fyll ut alle obligatoriske felt",
+        variant: "destructive"
+      });
+      return;
+    }
+
     console.log('Service request submitted:', formData);
-    // Handle form submission
+    
+    toast({
+      title: "Forespørsel sendt",
+      description: "Du vil motta tilbud fra verksteder i ditt område innen 24 timer",
+    });
   };
+
+  if (loading) {
+    return (
+      <div className="max-w-2xl mx-auto space-y-6">
+        <div className="text-center py-8">
+          <p className="text-gray-500">Laster dine biler...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -50,7 +113,7 @@ const ServiceRequestForm = () => {
           <CardHeader>
             <CardTitle className="text-lg flex items-center">
               <FileText className="h-5 w-5 mr-2" />
-              Type tjeneste
+              Type tjeneste *
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -79,29 +142,48 @@ const ServiceRequestForm = () => {
           <CardHeader>
             <CardTitle className="text-lg flex items-center">
               <Car className="h-5 w-5 mr-2" />
-              Velg bil
+              Velg bil *
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {userCars.map((car) => (
-                <button
-                  key={car.id}
-                  type="button"
-                  onClick={() => setFormData({ ...formData, car: car.id.toString() })}
-                  className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
-                    formData.car === car.id.toString()
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <p className="font-medium text-gray-900">{car.name}</p>
-                  <p className="text-sm text-gray-600">Årsmodell: {car.year}</p>
-                </button>
-              ))}
-              <Button variant="outline" type="button" className="w-full">
-                + Legg til ny bil
-              </Button>
+              {cars.length === 0 ? (
+                <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-xl">
+                  <p className="text-gray-500 mb-4">Du har ikke registrert noen biler ennå</p>
+                  <Link to="/add-car">
+                    <Button type="button">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Legg til bil
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <>
+                  {cars.map((car) => (
+                    <button
+                      key={car.id}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, car: car.id })}
+                      className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
+                        formData.car === car.id
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <p className="font-medium text-gray-900">
+                        {car.make} {car.model} ({car.license_plate})
+                      </p>
+                      <p className="text-sm text-gray-600">Årsmodell: {car.year}</p>
+                    </button>
+                  ))}
+                  <Link to="/add-car">
+                    <Button variant="outline" type="button" className="w-full">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Legg til ny bil
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -109,7 +191,7 @@ const ServiceRequestForm = () => {
         {/* Description */}
         <Card className="border-0 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-lg">Beskrivelse</CardTitle>
+            <CardTitle className="text-lg">Beskrivelse *</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -121,6 +203,7 @@ const ServiceRequestForm = () => {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="F.eks. Bilen lager rare lyder når jeg bremser..."
                   className="w-full mt-1 p-3 border border-gray-200 rounded-xl min-h-[100px] resize-none"
+                  required
                 />
               </div>
               
@@ -183,8 +266,12 @@ const ServiceRequestForm = () => {
 
         {/* Submit Button */}
         <div className="space-y-3">
-          <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 h-12">
-            Send forespørsel
+          <Button 
+            type="submit" 
+            className="w-full bg-blue-600 hover:bg-blue-700 h-12"
+            disabled={cars.length === 0}
+          >
+            {cars.length === 0 ? 'Legg til bil først' : 'Send forespørsel'}
           </Button>
           <p className="text-sm text-gray-500 text-center">
             Du vil motta tilbud fra verksteder i ditt område innen 24 timer
