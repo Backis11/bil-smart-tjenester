@@ -15,11 +15,9 @@ serve(async (req) => {
   try {
     console.log('=== VEGVESEN LOOKUP STARTED ===')
     console.log('Request method:', req.method)
-    console.log('Request URL:', req.url)
     
     const authHeader = req.headers.get('Authorization')
     console.log('Auth header present:', !!authHeader)
-    console.log('Auth header value:', authHeader ? 'Bearer [REDACTED]' : 'None')
     
     if (!authHeader) {
       console.error('❌ No authorization header found')
@@ -191,26 +189,85 @@ serve(async (req) => {
       )
     }
 
-    console.log('Vehicle data found:', JSON.stringify(vehicleData, null, 2))
+    console.log('🔍 Extracting vehicle data...')
+    
+    // Improved data extraction with multiple fallback paths
+    const tekniskData = vehicleData.godkjenning?.tekniskGodkjenning?.tekniskeData?.generelt;
+    const registrering = vehicleData.forstegangsregistrering || vehicleData.registrering;
+    const motorData = vehicleData.godkjenning?.tekniskGodkjenning?.tekniskeData?.motorOgDrivverk?.[0];
+    const kjoretoyId = vehicleData.kjoretoyId;
+    
+    // Extract make (merke) - prioritize actual brand over vehicle category
+    let make = '';
+    if (tekniskData?.merke?.[0]?.merke) {
+      make = tekniskData.merke[0].merke;
+    } else if (tekniskData?.fabrikant?.[0]?.fabrikantNavn) {
+      make = tekniskData.fabrikant[0].fabrikantNavn;
+    } else if (vehicleData.godkjenning?.tekniskGodkjenning?.kjoretoyklassifisering?.beskrivelse) {
+      make = vehicleData.godkjenning.tekniskGodkjenning.kjoretoyklassifisering.beskrivelse;
+    }
+    
+    // Extract model (modell)
+    let model = '';
+    if (tekniskData?.handelsbetegnelse?.[0]) {
+      model = tekniskData.handelsbetegnelse[0];
+    } else if (tekniskData?.typebetegnelse) {
+      model = tekniskData.typebetegnelse;
+    }
+    
+    // Extract year from registration date
+    let year = null;
+    if (registrering?.registrertForstegangNorgeDato) {
+      year = new Date(registrering.registrertForstegangNorgeDato).getFullYear();
+    } else if (registrering?.forstegangRegistrertDato) {
+      year = new Date(registrering.forstegangRegistrertDato).getFullYear();
+    }
+    
+    // Extract VIN
+    let vin = '';
+    if (kjoretoyId?.understellsnummer) {
+      vin = kjoretoyId.understellsnummer;
+    }
+    
+    // Extract fuel type - check multiple sources
+    let fuelType = '';
+    if (motorData?.drivstoff?.[0]?.drivstoffKode?.beskrivelse) {
+      fuelType = motorData.drivstoff[0].drivstoffKode.beskrivelse;
+    } else if (motorData?.motor?.drivstoffKode?.beskrivelse) {
+      fuelType = motorData.motor.drivstoffKode.beskrivelse;
+    } else if (make === 'TESLA') {
+      fuelType = 'Elektrisk'; // Default for Tesla vehicles
+    }
+    
+    // Extract engine size
+    let engineSize = '';
+    if (motorData?.motor?.slagvolum) {
+      engineSize = `${motorData.motor.slagvolum}L`;
+    } else if (motorData?.effekt) {
+      engineSize = `${motorData.effekt}kW`; // For electric vehicles
+    }
 
-    // Format the response data based on actual Vegvesen API structure
     const formattedData = {
       licensePlate: licensePlate,
-      make: vehicleData.godkjenning?.tekniskGodkjenning?.kjoretoyklassifisering?.beskrivelse || 
-            vehicleData.godkjenning?.tekniskGodkjenning?.tekniskeData?.generelt?.merke?.[0]?.merke || '',
-      model: vehicleData.godkjenning?.tekniskGodkjenning?.handelsbenevnelse?.[0] || 
-             vehicleData.godkjenning?.tekniskGodkjenning?.tekniskeData?.generelt?.handelsbetegnelse?.[0] || '',
-      year: vehicleData.godkjenning?.forstegangsregistrering?.registrertForstegangNorgeDato ? 
-        new Date(vehicleData.godkjenning.forstegangsregistrering.registrertForstegangNorgeDato).getFullYear() : null,
-      vin: vehicleData.kjennemerke?.understellsnummer || '',
-      fuelType: vehicleData.godkjenning?.tekniskGodkjenning?.motorOgDrivverk?.[0]?.drivstoff?.[0]?.drivstoffKode?.beskrivelse || '',
-      engineSize: vehicleData.godkjenning?.tekniskGodkjenning?.motorOgDrivverk?.[0]?.motor?.slagvolum || '',
-      registrationDate: vehicleData.godkjenning?.forstegangsregistrering?.registrertForstegangNorgeDato || null,
-      technicalApprovalDate: vehicleData.godkjenning?.godkjenningsDato || null,
+      make: make,
+      model: model,
+      year: year,
+      vin: vin,
+      fuelType: fuelType,
+      engineSize: engineSize,
+      registrationDate: registrering?.registrertForstegangNorgeDato || registrering?.forstegangRegistrertDato || null,
+      technicalApprovalDate: vehicleData.godkjenning?.tekniskGodkjenning?.gyldigFraDato || vehicleData.godkjenning?.godkjenningsDato || null,
       inspectionDueDate: vehicleData.periodiskKjoretoyKontroll?.kontrollfrist || null
     }
 
-    console.log('Formatted data:', JSON.stringify(formattedData, null, 2))
+    console.log('📋 Extracted data summary:')
+    console.log('- Make:', make)
+    console.log('- Model:', model) 
+    console.log('- Year:', year)
+    console.log('- Fuel type:', fuelType)
+    console.log('- Engine size:', engineSize)
+    console.log('- VIN:', vin)
+    
     console.log('✅ VEGVESEN LOOKUP COMPLETED SUCCESSFULLY')
 
     return new Response(
