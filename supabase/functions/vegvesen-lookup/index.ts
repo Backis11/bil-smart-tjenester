@@ -233,7 +233,7 @@ serve(async (req) => {
       vin = kjoretoyId.understellsnummer;
     }
     
-    // Extract fuel type - improved logic with multiple sources
+    // Extract fuel type - improved logic with multiple sources and proper array handling
     let fuelType = '';
     if (motorData?.drivstoff?.[0]?.drivstoffKode?.beskrivelse) {
       fuelType = motorData.drivstoff[0].drivstoffKode.beskrivelse;
@@ -244,12 +244,22 @@ serve(async (req) => {
     } else if (motorData?.motor?.drivstoffKode?.kodeNavn) {
       fuelType = motorData.motor.drivstoffKode.kodeNavn;
     } else if (vehicleData.godkjenning?.tekniskGodkjenning?.tekniskeData?.motorOgDrivverk) {
-      // Check if we can find fuel type in the motor data structure
+      // FIXED: Check if motorOgDrivverk is an array before iterating
       const allMotorData = vehicleData.godkjenning.tekniskGodkjenning.tekniskeData.motorOgDrivverk;
-      for (const motor of allMotorData) {
-        if (motor.drivstoff?.[0]?.drivstoffKode?.beskrivelse) {
-          fuelType = motor.drivstoff[0].drivstoffKode.beskrivelse;
-          break;
+      console.log('🔍 Motor data type:', typeof allMotorData, 'Is array:', Array.isArray(allMotorData));
+      
+      if (Array.isArray(allMotorData)) {
+        // Handle array case
+        for (const motor of allMotorData) {
+          if (motor.drivstoff?.[0]?.drivstoffKode?.beskrivelse) {
+            fuelType = motor.drivstoff[0].drivstoffKode.beskrivelse;
+            break;
+          }
+        }
+      } else if (allMotorData && typeof allMotorData === 'object') {
+        // Handle single object case
+        if (allMotorData.drivstoff?.[0]?.drivstoffKode?.beskrivelse) {
+          fuelType = allMotorData.drivstoff[0].drivstoffKode.beskrivelse;
         }
       }
     }
