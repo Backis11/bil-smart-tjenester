@@ -17,7 +17,7 @@ const Header = () => {
   const { user } = useAuth();
 
   // Show search bar when user is logged in OR when not on homepage
-  const showSearchBar = user || location.pathname !== '/';
+  const showSearchBar = !!user || location.pathname !== '/';
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
