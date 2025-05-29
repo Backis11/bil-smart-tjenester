@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,62 +25,150 @@ import {
 } from "lucide-react";
 import Header from "@/components/Header";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+
+interface CarData {
+  id: string;
+  make: string;
+  model: string;
+  year: number;
+  license_plate: string;
+  vin?: string;
+  fuel_type?: string;
+  engine_size?: string;
+  registration_date?: string;
+  technical_approval_date?: string;
+  inspection_due_date?: string;
+  mileage?: number;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+}
 
 const CarDetail = () => {
   const { id } = useParams();
   const { toast } = useToast();
+  const { user } = useAuth();
   
-  // Dummy data - in real app this would come from API
-  const [carData, setCarData] = useState({
-    id: parseInt(id || "1"),
-    brand: "Toyota",
-    model: "Corolla", 
-    year: 2020,
-    plate: "AB12345",
-    mileage: 45000,
-    euControl: "2024-06-15",
-    status: "Grønn",
-    vin: "JTDKN3DU2L0123456",
-    color: "Hvit",
-    fuelType: "Bensin",
-    // Extended data from Vegvesen API
-    technicalApprovalDate: "2020-01-15",
-    ownWeight: 1320,
-    totalWeight: 1800,
-    tireDimensions: "205/55R16",
-    rimDimensions: "6.5Jx16",
-    horsePower: 122,
-    co2Emissions: 142
-  });
-
+  const [carData, setCarData] = useState<CarData | null>(null);
+  const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
-  const [formData, setFormData] = useState(carData);
+  const [formData, setFormData] = useState<Partial<CarData>>({});
 
-  const handleSave = () => {
-    setCarData(formData);
-    setEditMode(false);
-    toast({
-      title: "Bil oppdatert",
-      description: "Informasjonen om bilen din er oppdatert.",
-    });
+  useEffect(() => {
+    const fetchCarData = async () => {
+      if (!user || !id) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('cars')
+          .select('*')
+          .eq('id', id)
+          .eq('user_id', user.id)
+          .single();
+
+        if (error) throw error;
+        
+        setCarData(data);
+        setFormData(data);
+      } catch (error) {
+        console.error('Error fetching car data:', error);
+        toast({
+          title: "Feil",
+          description: "Kunne ikke hente bildata",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCarData();
+  }, [user, id]);
+
+  const handleSave = async () => {
+    if (!carData || !user) return;
+
+    try {
+      const { error } = await supabase
+        .from('cars')
+        .update({
+          make: formData.make,
+          model: formData.model,
+          year: formData.year,
+          license_plate: formData.license_plate,
+          mileage: formData.mileage,
+          fuel_type: formData.fuel_type,
+          vin: formData.vin
+        })
+        .eq('id', carData.id)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      setCarData({ ...carData, ...formData });
+      setEditMode(false);
+      toast({
+        title: "Bil oppdatert",
+        description: "Informasjonen om bilen din er oppdatert.",
+      });
+    } catch (error) {
+      console.error('Error updating car:', error);
+      toast({
+        title: "Feil",
+        description: "Kunne ikke oppdatere bildata",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleCancel = () => {
-    setFormData(carData);
+    setFormData(carData || {});
     setEditMode(false);
   };
 
   // Calculate days until EU-kontroll
   const daysUntilEUControl = () => {
+    if (!carData?.inspection_due_date) return null;
     const today = new Date();
-    const euDate = new Date(carData.euControl);
+    const euDate = new Date(carData.inspection_due_date);
     const diffTime = euDate.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <div className="text-center">
+            <p className="text-gray-500">Laster bildata...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!carData) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <div className="text-center">
+            <p className="text-gray-500">Bil ikke funnet</p>
+            <Link to="/">
+              <Button className="mt-4">Tilbake til forsiden</Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const daysLeft = daysUntilEUControl();
-  const isEUControlSoon = daysLeft <= 60;
+  const isEUControlSoon = daysLeft !== null && daysLeft <= 60;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -96,12 +185,12 @@ const CarDetail = () => {
           </Link>
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
-              {carData.brand} {carData.model}
+              {carData.make} {carData.model}
             </h1>
-            <p className="text-gray-600">{carData.plate}</p>
+            <p className="text-gray-600">{carData.license_plate}</p>
           </div>
-          <Badge variant={carData.status === "Grønn" ? "default" : "secondary"}>
-            {carData.status}
+          <Badge variant={!isEUControlSoon ? "default" : "secondary"} className={!isEUControlSoon ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}>
+            {!isEUControlSoon ? "Grønn" : "Gul"}
           </Badge>
         </div>
 
@@ -116,7 +205,7 @@ const CarDetail = () => {
                     EU-kontroll nærmer seg
                   </p>
                   <p className="text-sm text-orange-600">
-                    {daysLeft > 0 ? `${daysLeft} dager igjen` : 'Fristen har gått ut'}
+                    {daysLeft !== null && daysLeft > 0 ? `${daysLeft} dager igjen` : 'Fristen har gått ut'}
                   </p>
                 </div>
                 <Link to="/services?service=eu-kontroll" className="ml-auto">
@@ -157,11 +246,11 @@ const CarDetail = () => {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="brand">Merke</Label>
+                    <Label htmlFor="make">Merke</Label>
                     <Input
-                      id="brand"
-                      value={editMode ? formData.brand : carData.brand}
-                      onChange={(e) => setFormData({...formData, brand: e.target.value})}
+                      id="make"
+                      value={editMode ? formData.make || '' : carData.make || ''}
+                      onChange={(e) => setFormData({...formData, make: e.target.value})}
                       disabled={!editMode}
                     />
                   </div>
@@ -169,7 +258,7 @@ const CarDetail = () => {
                     <Label htmlFor="model">Modell</Label>
                     <Input
                       id="model"
-                      value={editMode ? formData.model : carData.model}
+                      value={editMode ? formData.model || '' : carData.model || ''}
                       onChange={(e) => setFormData({...formData, model: e.target.value})}
                       disabled={!editMode}
                     />
@@ -179,17 +268,17 @@ const CarDetail = () => {
                     <Input
                       id="year"
                       type="number"
-                      value={editMode ? formData.year : carData.year}
+                      value={editMode ? formData.year || '' : carData.year || ''}
                       onChange={(e) => setFormData({...formData, year: parseInt(e.target.value)})}
                       disabled={!editMode}
                     />
                   </div>
                   <div>
-                    <Label htmlFor="plate">Registreringsnummer</Label>
+                    <Label htmlFor="license_plate">Registreringsnummer</Label>
                     <Input
-                      id="plate"
-                      value={editMode ? formData.plate : carData.plate}
-                      onChange={(e) => setFormData({...formData, plate: e.target.value})}
+                      id="license_plate"
+                      value={editMode ? formData.license_plate || '' : carData.license_plate || ''}
+                      onChange={(e) => setFormData({...formData, license_plate: e.target.value})}
                       disabled={!editMode}
                     />
                   </div>
@@ -198,34 +287,25 @@ const CarDetail = () => {
                     <Input
                       id="mileage"
                       type="number"
-                      value={editMode ? formData.mileage : carData.mileage}
+                      value={editMode ? formData.mileage || '' : carData.mileage || ''}
                       onChange={(e) => setFormData({...formData, mileage: parseInt(e.target.value)})}
                       disabled={!editMode}
                     />
                   </div>
                   <div>
-                    <Label htmlFor="color">Farge</Label>
+                    <Label htmlFor="fuel_type">Drivstoff</Label>
                     <Input
-                      id="color"
-                      value={editMode ? formData.color : carData.color}
-                      onChange={(e) => setFormData({...formData, color: e.target.value})}
+                      id="fuel_type"
+                      value={editMode ? formData.fuel_type || '' : carData.fuel_type || ''}
+                      onChange={(e) => setFormData({...formData, fuel_type: e.target.value})}
                       disabled={!editMode}
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="fuelType">Drivstoff</Label>
-                    <Input
-                      id="fuelType"
-                      value={editMode ? formData.fuelType : carData.fuelType}
-                      onChange={(e) => setFormData({...formData, fuelType: e.target.value})}
-                      disabled={!editMode}
-                    />
-                  </div>
-                  <div>
+                  <div className="md:col-span-2">
                     <Label htmlFor="vin">VIN-nummer</Label>
                     <Input
                       id="vin"
-                      value={editMode ? formData.vin : carData.vin}
+                      value={editMode ? formData.vin || '' : carData.vin || ''}
                       onChange={(e) => setFormData({...formData, vin: e.target.value})}
                       disabled={!editMode}
                     />
@@ -248,40 +328,32 @@ const CarDetail = () => {
                     <AccordionTrigger>Se alle tekniske spesifikasjoner</AccordionTrigger>
                     <AccordionContent>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                        <div>
-                          <Label className="text-sm font-medium text-gray-600">Teknisk godkjenning</Label>
-                          <p className="text-sm">{new Date(carData.technicalApprovalDate).toLocaleDateString('no-NO')}</p>
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium text-gray-600">Egenvekt</Label>
-                          <p className="text-sm">{carData.ownWeight} kg</p>
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium text-gray-600">Totalvekt</Label>
-                          <p className="text-sm">{carData.totalWeight} kg</p>
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium text-gray-600">Motoreffekt</Label>
-                          <p className="text-sm">{carData.horsePower} hk</p>
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium text-gray-600">CO₂-utslipp</Label>
-                          <p className="text-sm">{carData.co2Emissions} g/km</p>
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium text-gray-600">Dekkdimensjon</Label>
-                          <p className="text-sm">{carData.tireDimensions}</p>
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium text-gray-600">Felgdimensjon</Label>
-                          <p className="text-sm">{carData.rimDimensions}</p>
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium text-gray-600">Neste EU-kontroll</Label>
-                          <p className={`text-sm ${isEUControlSoon ? 'text-orange-600 font-medium' : ''}`}>
-                            {new Date(carData.euControl).toLocaleDateString('no-NO')}
-                          </p>
-                        </div>
+                        {carData.technical_approval_date && (
+                          <div>
+                            <Label className="text-sm font-medium text-gray-600">Teknisk godkjenning</Label>
+                            <p className="text-sm">{new Date(carData.technical_approval_date).toLocaleDateString('no-NO')}</p>
+                          </div>
+                        )}
+                        {carData.registration_date && (
+                          <div>
+                            <Label className="text-sm font-medium text-gray-600">Registreringsdato</Label>
+                            <p className="text-sm">{new Date(carData.registration_date).toLocaleDateString('no-NO')}</p>
+                          </div>
+                        )}
+                        {carData.engine_size && (
+                          <div>
+                            <Label className="text-sm font-medium text-gray-600">Motorstørrelse</Label>
+                            <p className="text-sm">{carData.engine_size}</p>
+                          </div>
+                        )}
+                        {carData.inspection_due_date && (
+                          <div>
+                            <Label className="text-sm font-medium text-gray-600">Neste EU-kontroll</Label>
+                            <p className={`text-sm ${isEUControlSoon ? 'text-orange-600 font-medium' : ''}`}>
+                              {new Date(carData.inspection_due_date).toLocaleDateString('no-NO')}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </AccordionContent>
                   </AccordionItem>
@@ -324,26 +396,32 @@ const CarDetail = () => {
                 <CardTitle>Nøkkelinformasjon</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Kilometerstand</span>
-                  <span className="font-medium">{carData.mileage.toLocaleString()} km</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Neste EU-kontroll</span>
-                  <span className={`font-medium ${isEUControlSoon ? 'text-orange-600' : ''}`}>
-                    {daysLeft > 0 ? `${daysLeft} dager` : 'Utgått'}
-                  </span>
-                </div>
+                {carData.mileage && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Kilometerstand</span>
+                    <span className="font-medium">{carData.mileage.toLocaleString()} km</span>
+                  </div>
+                )}
+                {daysLeft !== null && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Neste EU-kontroll</span>
+                    <span className={`font-medium ${isEUControlSoon ? 'text-orange-600' : ''}`}>
+                      {daysLeft > 0 ? `${daysLeft} dager` : 'Utgått'}
+                    </span>
+                  </div>
+                )}
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Status</span>
-                  <Badge variant={carData.status === "Grønn" ? "default" : "secondary"}>
-                    {carData.status}
+                  <Badge variant={!isEUControlSoon ? "default" : "secondary"} className={!isEUControlSoon ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}>
+                    {!isEUControlSoon ? "Grønn" : "Gul"}
                   </Badge>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Motoreffekt</span>
-                  <span className="font-medium">{carData.horsePower} hk</span>
-                </div>
+                {carData.year && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Årsmodell</span>
+                    <span className="font-medium">{carData.year}</span>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
