@@ -191,7 +191,7 @@ export const norwegianWorkshops: Workshop[] = [
     phone: "+47 73 82 90 00",
     email: "post@trondheimbil.no",
     rating: 4.6,
-    reviewCode: 87,
+    reviewCount: 87,
     description: "Midt-Norges største uavhengige verksted. Alle typer reparasjoner og service.",
     openingHours: "Man-Fre 07:00-17:00, Lør 08:00-14:00",
     services: ["Service", "EU-kontroll", "Dekkskift", "Bremseservice", "Kobling"],
