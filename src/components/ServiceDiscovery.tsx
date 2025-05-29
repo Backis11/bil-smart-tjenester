@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,12 +12,15 @@ import {
   Map,
   List
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { allWorkshops } from "@/data/workshops";
 import Header from "@/components/Header";
 
 const ServiceDiscovery = () => {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchParams] = useSearchParams();
+  const initialSearch = searchParams.get('search') || "";
+  
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
   const [selectedFilter, setSelectedFilter] = useState("Alle");
   const [viewMode, setViewMode] = useState<"list" | "map">("list");
 
@@ -25,7 +28,10 @@ const ServiceDiscovery = () => {
 
   const filteredWorkshops = allWorkshops.filter(workshop => {
     const matchesSearch = workshop.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         workshop.city.toLowerCase().includes(searchTerm.toLowerCase());
+                         workshop.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         workshop.services.some(service => 
+                           service.toLowerCase().includes(searchTerm.toLowerCase())
+                         );
     const matchesFilter = selectedFilter === "Alle" || 
                          workshop.services.some(service => 
                            service.toLowerCase().includes(selectedFilter.toLowerCase())

@@ -37,18 +37,36 @@ const App = () => (
               </div>
             </div>
           } />
-          <Route path="/services" element={
-            <div className="min-h-screen bg-gray-50">
-              <div className="p-4">
-                <ServiceDiscovery />
-              </div>
-            </div>
-          } />
+          <Route path="/services" element={<ServiceDiscovery />} />
           <Route path="/workshop/:id" element={<WorkshopDetail />} />
           <Route path="/get-quote" element={
             <div className="min-h-screen bg-gray-50">
               <div className="p-4">
                 <ServiceRequestForm />
+              </div>
+            </div>
+          } />
+          <Route path="/documents" element={
+            <div className="min-h-screen bg-gray-50">
+              <div className="p-4">
+                <h1 className="text-2xl font-bold mb-4">Mine dokumenter</h1>
+                <p>Dokumentoversikt kommer snart...</p>
+              </div>
+            </div>
+          } />
+          <Route path="/sell-car" element={
+            <div className="min-h-screen bg-gray-50">
+              <div className="p-4">
+                <h1 className="text-2xl font-bold mb-4">Selg bil</h1>
+                <p>Salgsplattform kommer snart...</p>
+              </div>
+            </div>
+          } />
+          <Route path="/add-car" element={
+            <div className="min-h-screen bg-gray-50">
+              <div className="p-4">
+                <h1 className="text-2xl font-bold mb-4">Legg til bil</h1>
+                <p>Registreringsskjema kommer snart...</p>
               </div>
             </div>
           } />

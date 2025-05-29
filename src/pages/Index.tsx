@@ -20,12 +20,12 @@ import Header from "@/components/Header";
 
 const Index = () => {
   const services = [
-    { title: "Service", icon: Wrench, description: "Få service på bilen din", color: "bg-blue-100 text-blue-600" },
-    { title: "EU-kontroll", icon: Shield, description: "Book EU-kontroll", color: "bg-green-100 text-green-600" },
-    { title: "Dokumenter", icon: FileText, description: "Se alle bilpapirer", color: "bg-purple-100 text-purple-600" },
-    { title: "Få tilbud", icon: ShoppingCart, description: "Sammenlign priser", color: "bg-orange-100 text-orange-600" },
-    { title: "Verdivurdering", icon: DollarSign, description: "Se bilens verdi", color: "bg-yellow-100 text-yellow-600" },
-    { title: "Selg bil", icon: Car, description: "Selg din bil enkelt", color: "bg-red-100 text-red-600" },
+    { title: "Service", icon: Wrench, description: "Få service på bilen din", color: "bg-blue-100 text-blue-600", link: "/services" },
+    { title: "EU-kontroll", icon: Shield, description: "Book EU-kontroll", color: "bg-green-100 text-green-600", link: "/services" },
+    { title: "Dokumenter", icon: FileText, description: "Se alle bilpapirer", color: "bg-purple-100 text-purple-600", link: "/documents" },
+    { title: "Få tilbud", icon: ShoppingCart, description: "Sammenlign priser", color: "bg-orange-100 text-orange-600", link: "/get-quote" },
+    { title: "Verdivurdering", icon: DollarSign, description: "Se bilens verdi", color: "bg-yellow-100 text-yellow-600", link: "/valuation" },
+    { title: "Selg bil", icon: Car, description: "Selg din bil enkelt", color: "bg-red-100 text-red-600", link: "/sell-car" },
   ];
 
   const cars = [
@@ -90,6 +90,14 @@ const Index = () => {
             <Input 
               placeholder="Søk etter verksted eller tjeneste..." 
               className="pl-10 bg-white"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  const searchTerm = (e.target as HTMLInputElement).value;
+                  if (searchTerm.trim()) {
+                    window.location.href = `/services?search=${encodeURIComponent(searchTerm)}`;
+                  }
+                }
+              }}
             />
           </div>
         </div>
@@ -101,15 +109,17 @@ const Index = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Hva skal du i dag?</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {services.map((service, index) => (
-              <Card key={index} className="hover:shadow-md transition-shadow cursor-pointer">
-                <CardContent className="p-6 text-center">
-                  <div className={`w-12 h-12 ${service.color} rounded-full flex items-center justify-center mx-auto mb-3`}>
-                    <service.icon className="h-6 w-6" />
-                  </div>
-                  <h3 className="font-semibold text-sm mb-1">{service.title}</h3>
-                  <p className="text-xs text-gray-500">{service.description}</p>
-                </CardContent>
-              </Card>
+              <Link key={index} to={service.link}>
+                <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                  <CardContent className="p-6 text-center">
+                    <div className={`w-12 h-12 ${service.color} rounded-full flex items-center justify-center mx-auto mb-3`}>
+                      <service.icon className="h-6 w-6" />
+                    </div>
+                    <h3 className="font-semibold text-sm mb-1">{service.title}</h3>
+                    <p className="text-xs text-gray-500">{service.description}</p>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         </section>
