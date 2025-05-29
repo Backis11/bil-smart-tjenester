@@ -17,12 +17,15 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { allWorkshops } from "@/data/workshops";
+import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ServiceCards from "@/components/ServiceCards";
 
 const Index = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +34,18 @@ const Index = () => {
     }
   };
 
+  // If user is logged in, show service cards
+  if (user) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Header />
+        <ServiceCards />
+        <Footer />
+      </div>
+    );
+  }
+
+  // If user is not logged in, show the original landing page
   const featuredWorkshops = allWorkshops.filter(w => w.featured).slice(0, 6);
 
   const features = [
