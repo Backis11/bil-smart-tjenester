@@ -16,6 +16,7 @@ import WorkshopAuth from "./pages/WorkshopAuth";
 import WorkshopRegister from "./pages/WorkshopRegister";
 import WorkshopDashboard from "./pages/WorkshopDashboard";
 import CarValuation from "./components/CarValuation";
+import ValuationSelection from "./components/ValuationSelection";
 import ServiceDiscovery from "./components/ServiceDiscovery";
 import ServiceRequestForm from "./components/ServiceRequestForm";
 import Documents from "./pages/Documents";
@@ -57,6 +58,11 @@ const App = () => (
                 <div className="min-h-screen bg-gray-50">
                   <CarDetail />
                 </div>
+              </AuthGuard>
+            } />
+            <Route path="/valuation" element={
+              <AuthGuard>
+                <ValuationSelection />
               </AuthGuard>
             } />
             <Route path="/valuation/:id" element={
