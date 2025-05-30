@@ -63,7 +63,7 @@ const Header = () => {
           )}
 
           {/* Desktop Actions */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-3">
             {user ? (
               <>
                 <NotificationDropdown
@@ -78,11 +78,11 @@ const Header = () => {
                 />
               </>
             ) : (
-              <div className="flex items-center space-x-2">
-                <Button variant="ghost" asChild>
+              <div className="flex items-center space-x-3">
+                <Button variant="ghost" size="sm" asChild className="text-gray-600 hover:text-gray-900">
                   <Link to="/auth?tab=login">Logg inn</Link>
                 </Button>
-                <Button asChild>
+                <Button size="sm" asChild className="bg-gray-900 hover:bg-gray-800 text-white">
                   <Link to="/auth?tab=register">Registrer deg</Link>
                 </Button>
               </div>
