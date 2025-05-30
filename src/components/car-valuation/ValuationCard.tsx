@@ -40,7 +40,7 @@ const ValuationCard: React.FC<ValuationCardProps> = ({
           <div className="text-center">
             <p className="text-sm text-gray-600 mb-1">Estimert markedsverdi</p>
             <p className="text-2xl font-bold text-gray-400">
-              Ikke nok data
+              Vi har ikke nok data enda
             </p>
             <p className="text-sm text-gray-500">
               Vi trenger mer informasjon for å gi en nøyaktig vurdering
