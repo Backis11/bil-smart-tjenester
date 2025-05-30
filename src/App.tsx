@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -24,6 +23,7 @@ import CarDetail from "./pages/CarDetail";
 import ResetPassword from "./pages/ResetPassword";
 import Blog from "./pages/Blog";
 import AddCar from "./pages/AddCar";
+import ServiceRequestThankYou from "./pages/ServiceRequestThankYou";
 
 const queryClient = new QueryClient();
 
@@ -79,6 +79,11 @@ const App = () => (
                     <ServiceRequestForm />
                   </div>
                 </div>
+              </AuthGuard>
+            } />
+            <Route path="/get-quote/thank-you" element={
+              <AuthGuard>
+                <ServiceRequestThankYou />
               </AuthGuard>
             } />
             <Route path="/documents" element={
