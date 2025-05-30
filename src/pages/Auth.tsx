@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,6 +42,20 @@ const Auth = () => {
   const [resetEmail, setResetEmail] = useState("");
   
   const defaultTab = searchParams.get('tab') || 'login';
+
+  // Prevent zoom on iOS when focusing input fields
+  useEffect(() => {
+    const viewport = document.querySelector('meta[name="viewport"]');
+    if (viewport) {
+      viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+    }
+
+    return () => {
+      if (viewport) {
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0');
+      }
+    };
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -220,6 +234,8 @@ const Auth = () => {
                       value={loginData.email}
                       onChange={(e) => setLoginData({...loginData, email: e.target.value})}
                       placeholder="din@epost.no"
+                      className="text-base" // Prevent zoom on iOS
+                      autoComplete="email"
                       required
                     />
                   </div>
@@ -233,6 +249,8 @@ const Auth = () => {
                         value={loginData.password}
                         onChange={(e) => setLoginData({...loginData, password: e.target.value})}
                         placeholder="••••••••"
+                        className="text-base pr-10" // Prevent zoom on iOS
+                        autoComplete="current-password"
                         required
                       />
                       <Button
@@ -263,6 +281,8 @@ const Auth = () => {
                         value={registerData.firstName}
                         onChange={(e) => setRegisterData({...registerData, firstName: e.target.value})}
                         placeholder="Ola"
+                        className="text-base"
+                        autoComplete="given-name"
                         required
                       />
                     </div>
@@ -273,6 +293,8 @@ const Auth = () => {
                         value={registerData.lastName}
                         onChange={(e) => setRegisterData({...registerData, lastName: e.target.value})}
                         placeholder="Nordmann"
+                        className="text-base"
+                        autoComplete="family-name"
                         required
                       />
                     </div>
@@ -286,6 +308,8 @@ const Auth = () => {
                       value={registerData.email}
                       onChange={(e) => setRegisterData({...registerData, email: e.target.value})}
                       placeholder="din@epost.no"
+                      className="text-base"
+                      autoComplete="email"
                       required
                     />
                   </div>
@@ -298,6 +322,8 @@ const Auth = () => {
                       value={registerData.phone}
                       onChange={(e) => setRegisterData({...registerData, phone: e.target.value})}
                       placeholder="12345678"
+                      className="text-base"
+                      autoComplete="tel"
                       required
                     />
                   </div>
@@ -309,6 +335,7 @@ const Auth = () => {
                       value={registerData.licensePlate}
                       onChange={(e) => setRegisterData({...registerData, licensePlate: e.target.value.toUpperCase()})}
                       placeholder="AB12345"
+                      className="text-base"
                       maxLength={7}
                       required
                     />
@@ -322,6 +349,7 @@ const Auth = () => {
                       value={registerData.kmStand}
                       onChange={(e) => setRegisterData({...registerData, kmStand: e.target.value})}
                       placeholder="50000"
+                      className="text-base"
                       min="0"
                     />
                   </div>
@@ -335,6 +363,8 @@ const Auth = () => {
                         value={registerData.password}
                         onChange={(e) => setRegisterData({...registerData, password: e.target.value})}
                         placeholder="••••••••"
+                        className="text-base pr-10"
+                        autoComplete="new-password"
                         required
                       />
                       <Button
@@ -357,6 +387,8 @@ const Auth = () => {
                       value={registerData.confirmPassword}
                       onChange={(e) => setRegisterData({...registerData, confirmPassword: e.target.value})}
                       placeholder="••••••••"
+                      className="text-base"
+                      autoComplete="new-password"
                       required
                     />
                   </div>
@@ -377,6 +409,8 @@ const Auth = () => {
                       value={resetEmail}
                       onChange={(e) => setResetEmail(e.target.value)}
                       placeholder="din@epost.no"
+                      className="text-base"
+                      autoComplete="email"
                       required
                     />
                   </div>

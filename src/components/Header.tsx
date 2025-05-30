@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Wrench } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -15,6 +15,29 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { user } = useAuth();
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isMobileMenuOpen) {
+        const target = event.target as Element;
+        const mobileMenuButton = target.closest('[data-mobile-menu]');
+        const mobileMenu = target.closest('[data-mobile-menu-content]');
+        
+        if (!mobileMenuButton && !mobileMenu) {
+          setIsMobileMenuOpen(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isMobileMenuOpen]);
 
   // Show search bar when user is logged in OR when not on homepage
   const showSearchBar = !!user || location.pathname !== '/';
@@ -66,13 +89,16 @@ const Header = () => {
             )}
           </div>
 
-          <MobileMenu
-            isOpen={isMobileMenuOpen}
-            setIsOpen={setIsMobileMenuOpen}
-            showSearchBar={showSearchBar}
-            isNotificationOpen={isNotificationOpen}
-            setIsNotificationOpen={setIsNotificationOpen}
-          />
+          {/* Mobile Menu */}
+          <div data-mobile-menu>
+            <MobileMenu
+              isOpen={isMobileMenuOpen}
+              setIsOpen={setIsMobileMenuOpen}
+              showSearchBar={showSearchBar}
+              isNotificationOpen={isNotificationOpen}
+              setIsNotificationOpen={setIsNotificationOpen}
+            />
+          </div>
         </div>
       </div>
     </header>
