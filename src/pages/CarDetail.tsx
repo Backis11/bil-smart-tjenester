@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -124,11 +123,15 @@ const CarDetail = () => {
     // Refresh car data after status change
     await fetchCarData();
     
-    // If car is no longer active, redirect to home
+    // If car is deleted, immediately redirect to home
+    if (carData?.status === 'deleted') {
+      navigate('/');
+      return;
+    }
+    
+    // For other status changes (sold, transferred), also redirect to home
     if (carData?.status && carData.status !== 'active') {
-      setTimeout(() => {
-        navigate('/');
-      }, 2000);
+      navigate('/');
     }
   };
 
