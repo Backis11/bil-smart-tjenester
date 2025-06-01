@@ -132,6 +132,68 @@ export type Database = {
         }
         Relationships: []
       }
+      documents: {
+        Row: {
+          car_id: string
+          created_at: string
+          description: string | null
+          document_date: string | null
+          document_type: string
+          file_name: string
+          file_size: number
+          id: string
+          mime_type: string
+          status: string | null
+          storage_path: string
+          title: string
+          updated_at: string
+          upload_date: string
+          workshop_name: string | null
+        }
+        Insert: {
+          car_id: string
+          created_at?: string
+          description?: string | null
+          document_date?: string | null
+          document_type: string
+          file_name: string
+          file_size: number
+          id?: string
+          mime_type: string
+          status?: string | null
+          storage_path: string
+          title: string
+          updated_at?: string
+          upload_date?: string
+          workshop_name?: string | null
+        }
+        Update: {
+          car_id?: string
+          created_at?: string
+          description?: string | null
+          document_date?: string | null
+          document_type?: string
+          file_name?: string
+          file_size?: number
+          id?: string
+          mime_type?: string
+          status?: string | null
+          storage_path?: string
+          title?: string
+          updated_at?: string
+          upload_date?: string
+          workshop_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_car_id_fkey"
+            columns: ["car_id"]
+            isOneToOne: false
+            referencedRelation: "cars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string | null
