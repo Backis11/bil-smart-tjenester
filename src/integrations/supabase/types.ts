@@ -74,8 +74,13 @@ export type Database = {
           make: string | null
           mileage: number | null
           model: string | null
+          notes: string | null
           registration_date: string | null
+          sold_at: string | null
+          status: string | null
           technical_approval_date: string | null
+          transferred_at: string | null
+          transferred_to: string | null
           updated_at: string
           user_id: string
           vin: string | null
@@ -91,8 +96,13 @@ export type Database = {
           make?: string | null
           mileage?: number | null
           model?: string | null
+          notes?: string | null
           registration_date?: string | null
+          sold_at?: string | null
+          status?: string | null
           technical_approval_date?: string | null
+          transferred_at?: string | null
+          transferred_to?: string | null
           updated_at?: string
           user_id: string
           vin?: string | null
@@ -108,8 +118,13 @@ export type Database = {
           make?: string | null
           mileage?: number | null
           model?: string | null
+          notes?: string | null
           registration_date?: string | null
+          sold_at?: string | null
+          status?: string | null
           technical_approval_date?: string | null
+          transferred_at?: string | null
+          transferred_to?: string | null
           updated_at?: string
           user_id?: string
           vin?: string | null

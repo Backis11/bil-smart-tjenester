@@ -20,8 +20,9 @@ const ValuationSelection: React.FC = () => {
       
       const { data, error } = await supabase
         .from('cars')
-        .select('id, make, model, year, license_plate')
+        .select('id, make, model, year, license_plate, status')
         .eq('user_id', user.id)
+        .eq('status', 'active') // Only show active cars
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -51,7 +52,7 @@ const ValuationSelection: React.FC = () => {
           <div className="text-center py-8">
             <TrendingUp className="h-16 w-16 text-gray-400 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Verdivurdering</h2>
-            <p className="text-gray-500 mb-4">Du må legge til en bil før du kan få verdivurdering</p>
+            <p className="text-gray-500 mb-4">Du må legge til en aktiv bil før du kan få verdivurdering</p>
             <Button onClick={() => navigate('/add-car')}>
               Legg til bil
             </Button>

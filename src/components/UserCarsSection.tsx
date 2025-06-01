@@ -15,6 +15,7 @@ interface Car {
   year: number;
   license_plate: string;
   inspection_due_date?: string;
+  status?: string;
 }
 
 const UserCarsSection = () => {
@@ -29,8 +30,9 @@ const UserCarsSection = () => {
       try {
         const { data, error } = await supabase
           .from('cars')
-          .select('id, make, model, year, license_plate, inspection_due_date')
+          .select('id, make, model, year, license_plate, inspection_due_date, status')
           .eq('user_id', user.id)
+          .eq('status', 'active') // Only show active cars
           .order('created_at', { ascending: false });
 
         if (error) throw error;
@@ -83,7 +85,7 @@ const UserCarsSection = () => {
       {cars.length === 0 ? (
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-8">
-            <p className="text-gray-500 mb-4">Du har ikke registrert noen biler ennå</p>
+            <p className="text-gray-500 mb-4">Du har ikke registrert noen aktive biler ennå</p>
             <Link to="/add-car">
               <Button>
                 <Plus className="h-4 w-4 mr-2" />

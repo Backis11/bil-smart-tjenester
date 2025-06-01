@@ -11,6 +11,7 @@ interface UserCar {
   model: string;
   year: number;
   license_plate: string;
+  status?: string;
 }
 
 interface CarSelectorProps {
@@ -20,6 +21,9 @@ interface CarSelectorProps {
 }
 
 const CarSelector = ({ cars, selectedCar, onCarChange }: CarSelectorProps) => {
+  // Filter out non-active cars
+  const activeCars = cars.filter(car => !car.status || car.status === 'active');
+
   return (
     <Card className="border-0 shadow-sm">
       <CardHeader>
@@ -30,9 +34,9 @@ const CarSelector = ({ cars, selectedCar, onCarChange }: CarSelectorProps) => {
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {cars.length === 0 ? (
+          {activeCars.length === 0 ? (
             <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-xl">
-              <p className="text-gray-500 mb-4">Du har ikke registrert noen biler ennå</p>
+              <p className="text-gray-500 mb-4">Du har ikke registrert noen aktive biler ennå</p>
               <Link to="/add-car">
                 <Button type="button">
                   <Plus className="h-4 w-4 mr-2" />
@@ -42,7 +46,7 @@ const CarSelector = ({ cars, selectedCar, onCarChange }: CarSelectorProps) => {
             </div>
           ) : (
             <>
-              {cars.map((car) => (
+              {activeCars.map((car) => (
                 <button
                   key={car.id}
                   type="button"

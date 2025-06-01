@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import { useToast } from "@/hooks/use-toast";
@@ -12,6 +12,7 @@ import CarInformationCard from "@/components/car-detail/CarInformationCard";
 import TechnicalDetailsCard from "@/components/car-detail/TechnicalDetailsCard";
 import QuickActionsCard from "@/components/car-detail/QuickActionsCard";
 import KeyStatsCard from "@/components/car-detail/KeyStatsCard";
+import CarActionsDialog from "@/components/car-detail/CarActionsDialog";
 
 interface CarData {
   id: string;
@@ -29,46 +30,52 @@ interface CarData {
   user_id: string;
   created_at: string;
   updated_at: string;
+  status?: string;
+  sold_at?: string;
+  transferred_at?: string;
+  transferred_to?: string;
+  notes?: string;
 }
 
 const CarDetail = () => {
   const { id } = useParams();
   const { toast } = useToast();
   const { user } = useAuth();
+  const navigate = useNavigate();
   
   const [carData, setCarData] = useState<CarData | null>(null);
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState<Partial<CarData>>({});
 
+  const fetchCarData = async () => {
+    if (!user || !id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('cars')
+        .select('*')
+        .eq('id', id)
+        .eq('user_id', user.id)
+        .single();
+
+      if (error) throw error;
+      
+      setCarData(data);
+      setFormData(data);
+    } catch (error) {
+      console.error('Error fetching car data:', error);
+      toast({
+        title: "Feil",
+        description: "Kunne ikke hente bildata",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchCarData = async () => {
-      if (!user || !id) return;
-
-      try {
-        const { data, error } = await supabase
-          .from('cars')
-          .select('*')
-          .eq('id', id)
-          .eq('user_id', user.id)
-          .single();
-
-        if (error) throw error;
-        
-        setCarData(data);
-        setFormData(data);
-      } catch (error) {
-        console.error('Error fetching car data:', error);
-        toast({
-          title: "Feil",
-          description: "Kunne ikke hente bildata",
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchCarData();
   }, [user, id]);
 
@@ -111,6 +118,18 @@ const CarDetail = () => {
   const handleCancel = () => {
     setFormData(carData || {});
     setEditMode(false);
+  };
+
+  const handleCarUpdated = async () => {
+    // Refresh car data after status change
+    await fetchCarData();
+    
+    // If car is no longer active, redirect to home
+    if (carData?.status && carData.status !== 'active') {
+      setTimeout(() => {
+        navigate('/');
+      }, 2000);
+    }
   };
 
   // Calculate days until EU-kontroll
@@ -179,9 +198,15 @@ const CarDetail = () => {
             <TechnicalDetailsCard carData={carData} isEUControlSoon={isEUControlSoon} />
           </div>
 
-          <div>
+          <div className="space-y-6">
             <QuickActionsCard carId={carData.id} />
             <KeyStatsCard carData={carData} daysLeft={daysLeft} isEUControlSoon={isEUControlSoon} />
+            <CarActionsDialog
+              carId={carData.id}
+              carMake={carData.make || ''}
+              carModel={carData.model || ''}
+              onCarUpdated={handleCarUpdated}
+            />
           </div>
         </div>
       </div>
