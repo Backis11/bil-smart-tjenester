@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,18 +31,25 @@ const CarActionsDialog = ({ carId, carMake, carModel, onCarUpdated }: CarActions
     
     setLoading(true);
     try {
+      console.log('Marking car as sold:', carId);
+      
       const { error } = await supabase
         .from('cars')
         .update({
           status: 'sold',
           sold_at: new Date().toISOString(),
-          notes: notes.trim() || null
+          notes: notes.trim() || null,
+          updated_at: new Date().toISOString()
         })
         .eq('id', carId)
         .eq('user_id', user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error marking car as sold:', error);
+        throw error;
+      }
 
+      console.log('Car marked as sold successfully');
       toast({
         title: "Bil markert som solgt",
         description: `${carMake} ${carModel} er nå markert som solgt.`,
@@ -53,10 +59,10 @@ const CarActionsDialog = ({ carId, carMake, carModel, onCarUpdated }: CarActions
       setShowSoldForm(false);
       setNotes('');
     } catch (error) {
-      console.error('Error marking car as sold:', error);
+      console.error('Error in handleSoldCar:', error);
       toast({
         title: "Feil",
-        description: "Kunne ikke markere bil som solgt",
+        description: "Kunne ikke markere bil som solgt. Prøv igjen.",
         variant: "destructive"
       });
     } finally {
@@ -69,19 +75,26 @@ const CarActionsDialog = ({ carId, carMake, carModel, onCarUpdated }: CarActions
     
     setLoading(true);
     try {
+      console.log('Transferring car:', carId, 'to:', transferTo);
+      
       const { error } = await supabase
         .from('cars')
         .update({
           status: 'transferred',
           transferred_at: new Date().toISOString(),
           transferred_to: transferTo.trim(),
-          notes: notes.trim() || null
+          notes: notes.trim() || null,
+          updated_at: new Date().toISOString()
         })
         .eq('id', carId)
         .eq('user_id', user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error transferring car:', error);
+        throw error;
+      }
 
+      console.log('Car transferred successfully');
       toast({
         title: "Eierskap overført",
         description: `${carMake} ${carModel} er overført til ${transferTo}.`,
@@ -92,10 +105,10 @@ const CarActionsDialog = ({ carId, carMake, carModel, onCarUpdated }: CarActions
       setTransferTo('');
       setNotes('');
     } catch (error) {
-      console.error('Error transferring car:', error);
+      console.error('Error in handleTransferCar:', error);
       toast({
         title: "Feil",
-        description: "Kunne ikke overføre eierskap",
+        description: "Kunne ikke overføre eierskap. Prøv igjen.",
         variant: "destructive"
       });
     } finally {
@@ -108,16 +121,23 @@ const CarActionsDialog = ({ carId, carMake, carModel, onCarUpdated }: CarActions
     
     setLoading(true);
     try {
+      console.log('Deleting car:', carId, 'for user:', user.id);
+      
       const { error } = await supabase
         .from('cars')
         .update({
-          status: 'deleted'
+          status: 'deleted',
+          updated_at: new Date().toISOString()
         })
         .eq('id', carId)
         .eq('user_id', user.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error when deleting car:', error);
+        throw error;
+      }
 
+      console.log('Car deleted successfully');
       toast({
         title: "Bil slettet",
         description: `${carMake} ${carModel} er slettet fra din profil.`,
@@ -126,10 +146,10 @@ const CarActionsDialog = ({ carId, carMake, carModel, onCarUpdated }: CarActions
       onCarUpdated();
       setShowDeleteConfirm(false);
     } catch (error) {
-      console.error('Error deleting car:', error);
+      console.error('Error in handleDeleteCar:', error);
       toast({
         title: "Feil",
-        description: "Kunne ikke slette bil",
+        description: "Kunne ikke slette bil. Prøv igjen.",
         variant: "destructive"
       });
     } finally {
