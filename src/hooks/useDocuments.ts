@@ -90,7 +90,7 @@ export const useDocuments = () => {
       const filePath = `${user.id}/${carId}/${fileName}`;
 
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('car-documents')
+        .from('bilmappa-files')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
@@ -138,19 +138,19 @@ export const useDocuments = () => {
   const downloadDocument = async (document: Document) => {
     try {
       const { data, error } = await supabase.storage
-        .from('car-documents')
+        .from('bilmappa-files')
         .download(document.storage_path);
 
       if (error) throw error;
 
-      // Create download link
+      // Create download link using window.document instead of document
       const url = URL.createObjectURL(data);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = document.file_name;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      const link = window.document.createElement('a');
+      link.href = url;
+      link.download = document.file_name;
+      window.document.body.appendChild(link);
+      link.click();
+      window.document.body.removeChild(link);
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error downloading document:', error);
