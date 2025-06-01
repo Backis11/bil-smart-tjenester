@@ -120,19 +120,8 @@ const CarDetail = () => {
   };
 
   const handleCarUpdated = async () => {
-    // Refresh car data after status change
-    await fetchCarData();
-    
-    // If car is deleted, immediately redirect to home
-    if (carData?.status === 'deleted') {
-      navigate('/');
-      return;
-    }
-    
-    // For other status changes (sold, transferred), also redirect to home
-    if (carData?.status && carData.status !== 'active') {
-      navigate('/');
-    }
+    // Always redirect to home page after any car action (delete, sell, transfer)
+    navigate('/');
   };
 
   // Calculate days until EU-kontroll
