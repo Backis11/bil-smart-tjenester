@@ -11,7 +11,6 @@ import EmptyDocumentsState from "@/components/documents/EmptyDocumentsState";
 
 const Documents = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const { 
     documents, 
     loading, 
@@ -82,7 +81,7 @@ const Documents = () => {
 
         {/* Content */}
         {documents.length === 0 ? (
-          <EmptyDocumentsState onUploadClick={() => setUploadDialogOpen(true)} />
+          <EmptyDocumentsState onUploadClick={() => {}} />
         ) : (
           <>
             {/* Documents grid */}
@@ -105,14 +104,6 @@ const Documents = () => {
               </div>
             )}
           </>
-        )}
-
-        {/* Hidden upload dialog trigger for empty state */}
-        {uploadDialogOpen && (
-          <DocumentUploadDialog 
-            onUpload={uploadDocument} 
-            uploading={uploading}
-          />
         )}
       </div>
     </div>

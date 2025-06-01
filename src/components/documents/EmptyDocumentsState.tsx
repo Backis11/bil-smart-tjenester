@@ -1,12 +1,12 @@
 
 import { Button } from "@/components/ui/button";
 import { FileText, Upload, TrendingUp } from "lucide-react";
+import DocumentUploadDialog from "./DocumentUploadDialog";
+import { useDocuments } from "@/hooks/useDocuments";
 
-interface EmptyDocumentsStateProps {
-  onUploadClick: () => void;
-}
+const EmptyDocumentsState = ({ onUploadClick }: { onUploadClick: () => void }) => {
+  const { uploadDocument, uploading } = useDocuments();
 
-const EmptyDocumentsState = ({ onUploadClick }: EmptyDocumentsStateProps) => {
   return (
     <div className="text-center py-16 px-4">
       <div className="max-w-md mx-auto">
@@ -31,10 +31,10 @@ const EmptyDocumentsState = ({ onUploadClick }: EmptyDocumentsStateProps) => {
           </ul>
         </div>
 
-        <Button onClick={onUploadClick} size="lg" className="flex items-center space-x-2">
-          <Upload className="h-5 w-5" />
-          <span>Last opp første dokument</span>
-        </Button>
+        <DocumentUploadDialog 
+          onUpload={uploadDocument} 
+          uploading={uploading}
+        />
         
         <p className="text-sm text-gray-500 mt-4">
           Støttede filtyper: PDF, JPG, PNG, DOC, DOCX
