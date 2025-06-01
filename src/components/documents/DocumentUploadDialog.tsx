@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -149,7 +148,8 @@ const DocumentUploadDialog = ({ onUpload, uploading }: DocumentUploadDialogProps
             <Input
               id="file-upload"
               type="file"
-              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,image/*"
+              capture="environment"
               onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
               required
             />

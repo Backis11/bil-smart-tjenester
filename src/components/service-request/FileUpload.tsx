@@ -89,6 +89,7 @@ const FileUpload = ({ uploadedFiles, onFilesChange }: FileUploadProps) => {
           type="file"
           multiple
           accept="image/*,video/*"
+          capture="environment"
           onChange={handleFileUpload}
           className="hidden"
           id="file-upload"
