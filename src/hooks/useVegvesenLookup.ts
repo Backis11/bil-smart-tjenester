@@ -1,146 +1,212 @@
 
 import { useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-
-interface VehicleData {
-  licensePlate: string;
-  make: string;
-  model: string;
-  year: number | null;
-  vin: string;
-  fuelType: string;
-  engineSize: string;
-  registrationDate: string | null;
-  technicalApprovalDate: string | null;
-  inspectionDueDate: string | null;
-  ownWeight: number | null;
-  totalWeight: number | null;
-  tireDimensions: string;
-  rimDimensions: string;
-  horsePower: number | null;
-  co2Emissions: number | null;
-}
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 export const useVegvesenLookup = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useAuth();
   const { toast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
-  const lookupVehicle = async (licensePlate: string): Promise<VehicleData | null> => {
+  const lookupVehicle = async (licensePlate: string) => {
     if (!user) {
       toast({
         title: "Feil",
-        description: "Du må være innlogget for å bruke denne tjenesten",
+        description: "Du må være logget inn for å bruke denne tjenesten",
         variant: "destructive"
       });
       return null;
     }
 
     setIsLoading(true);
-
+    
     try {
-      console.log('🔄 Starting vehicle lookup for:', licensePlate);
-      console.log('User:', user.email);
-      
       const { data, error } = await supabase.functions.invoke('vegvesen-lookup', {
         body: { licensePlate: licensePlate.toUpperCase() }
       });
 
-      console.log('Supabase function response:', { data, error });
-
       if (error) {
-        console.error('Supabase function error:', error);
-        throw new Error(error.message || 'Failed to lookup vehicle');
+        console.error('Vegvesen lookup error:', error);
+        toast({
+          title: "Feil ved oppslag",
+          description: error.message || "Kunne ikke hente bildata fra Vegvesenet",
+          variant: "destructive"
+        });
+        return null;
       }
 
-      if (data.error) {
-        throw new Error(data.error);
+      if (!data || !data.make) {
+        toast({
+          title: "Ingen data funnet",
+          description: "Fant ingen bildata for dette registreringsnummeret",
+          variant: "destructive"
+        });
+        return null;
       }
 
       toast({
-        title: "Vellykket",
-        description: "Bildata hentet fra Vegvesenet"
+        title: "Bildata hentet",
+        description: "Informasjon hentet fra Vegvesenet"
       });
 
-      return data;
-    } catch (error: any) {
-      console.error('Vehicle lookup error:', error);
-      
-      let errorMessage = "Kunne ikke hente bildata";
-      
-      if (error.message.includes('quota exceeded')) {
-        errorMessage = "Du har brukt opp ditt daglige antall oppslag (10). Prøv igjen i morgen.";
-      } else if (error.message.includes('No vehicle data found')) {
-        errorMessage = "Ingen bildata funnet for dette registreringsnummeret";
-      } else if (error.message.includes('Authentication failed') || error.message.includes('Unauthorized')) {
-        errorMessage = "Autentiseringsfeil. Prøv å logge ut og inn igjen.";
-      } else if (error.message.includes('Failed to fetch vehicle data from Vegvesenet')) {
-        errorMessage = "Vegvesenet sin tjeneste er ikke tilgjengelig for øyeblikket. Prøv igjen senere.";
-      } else if (error.message.includes('Internal server error')) {
-        errorMessage = "Intern serverfeil. Hvis problemet vedvarer, kontakt support.";
-      }
-
+      return {
+        licensePlate: licensePlate.toUpperCase(),
+        make: data.make,
+        model: data.model,
+        year: data.year,
+        fuelType: data.fuelType,
+        engineSize: data.engineSize,
+        vin: data.vin,
+        registrationDate: data.registrationDate,
+        technicalApprovalDate: data.technicalApprovalDate,
+        inspectionDueDate: data.inspectionDueDate
+      };
+    } catch (error) {
+      console.error('Vegvesen lookup error:', error);
       toast({
         title: "Feil",
-        description: errorMessage,
+        description: "En uventet feil oppstod ved oppslag",
         variant: "destructive"
       });
-
       return null;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const saveCar = async (carData: Partial<VehicleData>) => {
-    if (!user) return null;
+  const saveCar = async (carData: any) => {
+    if (!user) {
+      toast({
+        title: "Feil",
+        description: "Du må være logget inn for å registrere en bil",
+        variant: "destructive"
+      });
+      return false;
+    }
 
     try {
-      const { data, error } = await supabase
+      // Check if there's an existing active car with the same license plate
+      const { data: existingCar, error: checkError } = await supabase
         .from('cars')
-        .insert({
-          user_id: user.id,
-          license_plate: carData.licensePlate!,
-          make: carData.make,
-          model: carData.model,
-          year: carData.year,
-          vin: carData.vin,
-          fuel_type: carData.fuelType,
-          engine_size: carData.engineSize,
-          registration_date: carData.registrationDate,
-          technical_approval_date: carData.technicalApprovalDate,
-          inspection_due_date: carData.inspectionDueDate
-        })
-        .select()
-        .single();
+        .select('id, status')
+        .eq('license_plate', carData.licensePlate)
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .maybeSingle();
 
-      if (error) {
-        throw error;
+      if (checkError) {
+        console.error('Error checking existing car:', checkError);
+        toast({
+          title: "Feil",
+          description: "Kunne ikke sjekke eksisterende bildata",
+          variant: "destructive"
+        });
+        return false;
+      }
+
+      if (existingCar) {
+        toast({
+          title: "Bil eksisterer allerede",
+          description: "Du har allerede registrert denne bilen som aktiv",
+          variant: "destructive"
+        });
+        return false;
+      }
+
+      // Check if there's a deleted car with the same license plate that we can reactivate
+      const { data: deletedCar, error: deletedCheckError } = await supabase
+        .from('cars')
+        .select('id')
+        .eq('license_plate', carData.licensePlate)
+        .eq('user_id', user.id)
+        .eq('status', 'deleted')
+        .maybeSingle();
+
+      if (deletedCheckError) {
+        console.error('Error checking deleted car:', deletedCheckError);
+      }
+
+      let result;
+      
+      if (deletedCar) {
+        // Reactivate the deleted car with new data
+        const { data, error } = await supabase
+          .from('cars')
+          .update({
+            make: carData.make,
+            model: carData.model,
+            year: carData.year,
+            fuel_type: carData.fuelType,
+            engine_size: carData.engineSize,
+            vin: carData.vin,
+            registration_date: carData.registrationDate,
+            technical_approval_date: carData.technicalApprovalDate,
+            inspection_due_date: carData.inspectionDueDate,
+            mileage: carData.mileage,
+            status: 'active',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', deletedCar.id)
+          .eq('user_id', user.id)
+          .select()
+          .single();
+
+        result = { data, error };
+      } else {
+        // Create a new car
+        const { data, error } = await supabase
+          .from('cars')
+          .insert({
+            user_id: user.id,
+            license_plate: carData.licensePlate,
+            make: carData.make,
+            model: carData.model,
+            year: carData.year,
+            fuel_type: carData.fuelType,
+            engine_size: carData.engineSize,
+            vin: carData.vin,
+            registration_date: carData.registrationDate,
+            technical_approval_date: carData.technicalApprovalDate,
+            inspection_due_date: carData.inspectionDueDate,
+            mileage: carData.mileage,
+            status: 'active'
+          })
+          .select()
+          .single();
+
+        result = { data, error };
+      }
+
+      if (result.error) {
+        console.error('Error saving car:', result.error);
+        toast({
+          title: "Feil",
+          description: "Kunne ikke registrere bilen",
+          variant: "destructive"
+        });
+        return false;
       }
 
       toast({
         title: "Bil registrert",
-        description: `${carData.make} ${carData.model} er lagt til i dine biler`
+        description: deletedCar 
+          ? "Bilen din er reaktivert og oppdatert med ny informasjon"
+          : "Bilen din er nå registrert i systemet"
       });
 
-      return data;
-    } catch (error: any) {
-      console.error('Save car error:', error);
-      
-      let errorMessage = "Kunne ikke registrere bil";
-      if (error.code === '23505') {
-        errorMessage = "Denne bilen er allerede registrert";
-      }
-
+      navigate('/');
+      return true;
+    } catch (error) {
+      console.error('Error saving car:', error);
       toast({
         title: "Feil",
-        description: errorMessage,
+        description: "En uventet feil oppstod ved registrering",
         variant: "destructive"
       });
-
-      return null;
+      return false;
     }
   };
 
