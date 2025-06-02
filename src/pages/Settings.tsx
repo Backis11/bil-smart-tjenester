@@ -29,49 +29,88 @@ const Settings = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const handleSignOut = async () => {
+    setIsSigningOut(true);
     try {
       await signOut();
       toast({
         title: "Logget ut",
         description: "Du er nå logget ut av systemet",
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Sign out error:', error);
       toast({
         title: "Feil ved utlogging",
-        description: "Noe gikk galt, prøv igjen",
+        description: error.message || "Noe gikk galt, prøv igjen",
         variant: "destructive",
       });
+    } finally {
+      setIsSigningOut(false);
     }
   };
 
   const handleDeleteAccount = async () => {
-    if (!user) return;
+    if (!user) {
+      toast({
+        title: "Feil",
+        description: "Ingen bruker å slette",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsDeleting(true);
     try {
+      console.log('Starting account deletion for user:', user.id);
+      
+      // Get the current session token
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !sessionData.session?.access_token) {
+        console.error('Session error:', sessionError);
+        throw new Error('Kunne ikke hente brukerøkt');
+      }
+
       // Call our edge function to delete the user
       const { data, error } = await supabase.functions.invoke('delete-user', {
         headers: {
-          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          Authorization: `Bearer ${sessionData.session.access_token}`,
         },
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Edge function error:', error);
+        throw new Error(error.message || 'Feil ved sletting av konto');
+      }
+
+      console.log('Delete function response:', data);
 
       toast({
         title: "Konto slettet",
-        description: "Din konto er permanent slettet",
+        description: "Din konto og alle tilhørende data er permanent slettet",
       });
       
       // Navigate to home page after successful deletion
       navigate("/");
     } catch (error: any) {
       console.error('Delete account error:', error);
+      
+      let errorMessage = "Noe gikk galt, prøv igjen";
+      
+      // Handle specific error types
+      if (error.message.includes('Unauthorized')) {
+        errorMessage = "Du er ikke autorisert til å utføre denne handlingen";
+      } else if (error.message.includes('Network')) {
+        errorMessage = "Nettverksfeil, sjekk internetttilkoblingen din";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Feil ved sletting av konto",
-        description: error.message || "Noe gikk galt, prøv igjen",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -174,12 +213,12 @@ const Settings = () => {
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                 <h3 className="font-medium text-red-900 mb-2">Slett konto</h3>
                 <p className="text-sm text-red-700 mb-4">
-                  Dette vil permanent slette kontoen din og alle tilhørende data. Denne handlingen kan ikke angres.
+                  Dette vil permanent slette kontoen din og alle tilhørende data inkludert biler, dokumenter og tjenesterequester. Denne handlingen kan ikke angres.
                 </p>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="destructive" size="sm">
-                      Slett konto
+                    <Button variant="destructive" size="sm" disabled={isDeleting}>
+                      {isDeleting ? "Sletter..." : "Slett konto"}
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
@@ -191,7 +230,7 @@ const Settings = () => {
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                      <AlertDialogCancel disabled={isDeleting}>Avbryt</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={handleDeleteAccount}
                         disabled={isDeleting}
@@ -207,8 +246,13 @@ const Settings = () => {
               <Separator />
               
               <div>
-                <Button variant="outline" onClick={handleSignOut} className="w-full sm:w-auto">
-                  Logg ut
+                <Button 
+                  variant="outline" 
+                  onClick={handleSignOut} 
+                  disabled={isSigningOut}
+                  className="w-full sm:w-auto"
+                >
+                  {isSigningOut ? "Logger ut..." : "Logg ut"}
                 </Button>
               </div>
             </CardContent>

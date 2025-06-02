@@ -61,17 +61,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const licensePlate = user.user_metadata?.license_plate;
       const kmStand = user.user_metadata?.km_stand;
       
-      if (!licensePlate) return;
+      if (!licensePlate) {
+        console.log('No license plate in user metadata, skipping car creation');
+        return;
+      }
 
       // Check if car already exists
-      const { data: existingCar } = await supabase
+      const { data: existingCar, error: checkError } = await supabase
         .from('cars')
         .select('id')
         .eq('user_id', user.id)
         .eq('license_plate', licensePlate)
         .single();
 
-      if (existingCar) return; // Car already exists
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error('Error checking existing car:', checkError);
+        return;
+      }
+
+      if (existingCar) {
+        console.log('Car already exists for user');
+        return;
+      }
 
       // Create new car
       const { error } = await supabase
@@ -133,8 +144,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    } catch (error: any) {
+      console.error('Sign out error:', error);
+      throw error;
+    }
   };
 
   const resetPassword = async (email: string) => {
