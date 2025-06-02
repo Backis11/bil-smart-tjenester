@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Upload } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface Car {
   id: string;
@@ -35,6 +37,7 @@ interface DocumentUploadDialogProps {
 const DocumentUploadDialog = ({ onUpload, uploading }: DocumentUploadDialogProps) => {
   const [open, setOpen] = useState(false);
   const [cars, setCars] = useState<Car[]>([]);
+  const [loadingCars, setLoadingCars] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     carId: '',
@@ -45,11 +48,15 @@ const DocumentUploadDialog = ({ onUpload, uploading }: DocumentUploadDialogProps
     workshop_name: ''
   });
   const { user } = useAuth();
+  const { toast } = useToast();
 
   const fetchUserCars = async () => {
     if (!user) return;
 
+    setLoadingCars(true);
     try {
+      console.log('Fetching user cars for user:', user.id);
+      
       const { data, error } = await supabase
         .from('cars')
         .select('id, make, model, year, license_plate')
@@ -57,10 +64,30 @@ const DocumentUploadDialog = ({ onUpload, uploading }: DocumentUploadDialogProps
         .eq('status', 'active')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching cars:', error);
+        throw error;
+      }
+      
+      console.log('Fetched cars:', data);
       setCars(data || []);
+      
+      if (!data || data.length === 0) {
+        toast({
+          title: "Ingen biler funnet",
+          description: "Du må først registrere en bil før du kan laste opp dokumenter",
+          variant: "destructive"
+        });
+      }
     } catch (error) {
       console.error('Error fetching cars:', error);
+      toast({
+        title: "Feil",
+        description: "Kunne ikke hente dine biler",
+        variant: "destructive"
+      });
+    } finally {
+      setLoadingCars(false);
     }
   };
 
@@ -82,10 +109,43 @@ const DocumentUploadDialog = ({ onUpload, uploading }: DocumentUploadDialogProps
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    console.log('File selected:', file);
+    
+    if (file) {
+      // Check file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        toast({
+          title: "Fil for stor",
+          description: "Maksimal filstørrelse er 10MB",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Auto-generate title from filename if not set
+      if (!formData.title) {
+        const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
+        setFormData(prev => ({ ...prev, title: nameWithoutExt }));
+      }
+    }
+    
+    setSelectedFile(file);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('Submitting form with data:', formData);
+    console.log('Selected file:', selectedFile);
+    
     if (!selectedFile || !formData.carId || !formData.title || !formData.document_type) {
+      toast({
+        title: "Manglende informasjon",
+        description: "Vennligst fyll ut alle obligatoriske felt og velg en fil",
+        variant: "destructive"
+      });
       return;
     }
 
@@ -128,35 +188,43 @@ const DocumentUploadDialog = ({ onUpload, uploading }: DocumentUploadDialogProps
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="car-select">Velg bil</Label>
-            <Select value={formData.carId} onValueChange={(value) => setFormData({...formData, carId: value})}>
-              <SelectTrigger>
-                <SelectValue placeholder="Velg bil" />
-              </SelectTrigger>
-              <SelectContent>
-                {cars.map((car) => (
-                  <SelectItem key={car.id} value={car.id}>
-                    {car.license_plate} - {car.make} {car.model} ({car.year})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label htmlFor="car-select">Velg bil *</Label>
+            {loadingCars ? (
+              <div className="text-sm text-gray-500">Laster biler...</div>
+            ) : (
+              <Select value={formData.carId} onValueChange={(value) => setFormData({...formData, carId: value})}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Velg bil" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cars.map((car) => (
+                    <SelectItem key={car.id} value={car.id}>
+                      {car.license_plate} - {car.make} {car.model} ({car.year})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
 
           <div>
-            <Label htmlFor="file-upload">Velg fil</Label>
+            <Label htmlFor="file-upload">Velg fil *</Label>
             <Input
               id="file-upload"
               type="file"
               accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,image/*"
-              capture="environment"
-              onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+              onChange={handleFileChange}
               required
             />
+            {selectedFile && (
+              <div className="mt-2 text-sm text-gray-600">
+                Valgt fil: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+              </div>
+            )}
           </div>
 
           <div>
-            <Label htmlFor="title">Tittel</Label>
+            <Label htmlFor="title">Tittel *</Label>
             <Input
               id="title"
               value={formData.title}
@@ -167,7 +235,7 @@ const DocumentUploadDialog = ({ onUpload, uploading }: DocumentUploadDialogProps
           </div>
 
           <div>
-            <Label htmlFor="document-type">Type dokument</Label>
+            <Label htmlFor="document-type">Type dokument *</Label>
             <Select value={formData.document_type} onValueChange={(value) => setFormData({...formData, document_type: value})}>
               <SelectTrigger>
                 <SelectValue placeholder="Velg type" />
@@ -218,12 +286,13 @@ const DocumentUploadDialog = ({ onUpload, uploading }: DocumentUploadDialogProps
               variant="outline" 
               onClick={() => setOpen(false)}
               className="flex-1"
+              disabled={uploading}
             >
               Avbryt
             </Button>
             <Button 
               type="submit" 
-              disabled={uploading || !selectedFile || !formData.carId || !formData.title || !formData.document_type}
+              disabled={uploading || !selectedFile || !formData.carId || !formData.title || !formData.document_type || cars.length === 0}
               className="flex-1"
             >
               {uploading ? "Laster opp..." : "Last opp"}

@@ -46,7 +46,10 @@ export const useDocuments = () => {
         .eq('status', 'active')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching documents:', error);
+        throw error;
+      }
 
       setDocuments(data || []);
     } catch (error) {
@@ -89,11 +92,21 @@ export const useDocuments = () => {
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `${user.id}/${carId}/${fileName}`;
 
+      console.log('Uploading file to path:', filePath);
+
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('bilmappa-files')
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Storage upload error:', uploadError);
+        throw uploadError;
+      }
+
+      console.log('File uploaded successfully:', uploadData);
 
       // Save document metadata to database
       const { data: documentRecord, error: dbError } = await supabase
@@ -113,20 +126,39 @@ export const useDocuments = () => {
         .select()
         .single();
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        console.error('Database insert error:', dbError);
+        // Try to clean up uploaded file if database insert fails
+        await supabase.storage
+          .from('bilmappa-files')
+          .remove([uploadData.path]);
+        throw dbError;
+      }
+
+      console.log('Document record created:', documentRecord);
 
       toast({
         title: "Dokument lastet opp",
         description: "Dokumentet er nå lagret for bilen din"
       });
 
-      fetchDocuments();
+      await fetchDocuments();
       return true;
     } catch (error) {
       console.error('Error uploading document:', error);
+      
+      let errorMessage = "Kunne ikke laste opp dokumentet";
+      if (error instanceof Error) {
+        if (error.message.includes('row-level security')) {
+          errorMessage = "Du har ikke tilgang til å laste opp dokumenter for denne bilen";
+        } else if (error.message.includes('storage')) {
+          errorMessage = "Feil ved opplasting av fil. Prøv igjen.";
+        }
+      }
+      
       toast({
         title: "Feil ved opplasting",
-        description: "Kunne ikke laste opp dokumentet",
+        description: errorMessage,
         variant: "destructive"
       });
       return false;
@@ -137,13 +169,18 @@ export const useDocuments = () => {
 
   const downloadDocument = async (document: Document) => {
     try {
+      console.log('Downloading document from path:', document.storage_path);
+      
       const { data, error } = await supabase.storage
         .from('bilmappa-files')
         .download(document.storage_path);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Download error:', error);
+        throw error;
+      }
 
-      // Create download link using window.document instead of document
+      // Create download link
       const url = URL.createObjectURL(data);
       const link = window.document.createElement('a');
       link.href = url;
@@ -164,19 +201,39 @@ export const useDocuments = () => {
 
   const deleteDocument = async (documentId: string) => {
     try {
+      console.log('Deleting document:', documentId);
+      
+      // Find the document to get storage path for cleanup
+      const documentToDelete = documents.find(doc => doc.id === documentId);
+      
       const { error } = await supabase
         .from('documents')
         .update({ status: 'archived' })
         .eq('id', documentId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database delete error:', error);
+        throw error;
+      }
+
+      // Optionally delete file from storage
+      if (documentToDelete?.storage_path) {
+        const { error: storageError } = await supabase.storage
+          .from('bilmappa-files')
+          .remove([documentToDelete.storage_path]);
+        
+        if (storageError) {
+          console.warn('Could not delete file from storage:', storageError);
+          // Don't throw error for storage cleanup failure
+        }
+      }
 
       toast({
         title: "Dokument slettet",
         description: "Dokumentet er fjernet fra listen"
       });
 
-      fetchDocuments();
+      await fetchDocuments();
     } catch (error) {
       console.error('Error deleting document:', error);
       toast({
