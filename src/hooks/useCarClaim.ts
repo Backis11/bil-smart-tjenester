@@ -17,6 +17,12 @@ interface CarClaimResult {
   document_count?: number;
 }
 
+interface ClaimCarResult {
+  success: boolean;
+  message?: string;
+  error?: string;
+}
+
 export const useCarClaim = () => {
   const [isChecking, setIsChecking] = useState(false);
   const [isClaiming, setIsClaiming] = useState(false);
@@ -93,10 +99,12 @@ export const useCarClaim = () => {
         return false;
       }
 
-      if (!data.success) {
+      const result = data as ClaimCarResult;
+
+      if (!result.success) {
         toast({
           title: "Kunne ikke overta bil",
-          description: data.error || "Ukjent feil",
+          description: result.error || "Ukjent feil",
           variant: "destructive"
         });
         return false;
