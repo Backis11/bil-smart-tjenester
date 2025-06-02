@@ -9,14 +9,17 @@ import { useToast } from "@/hooks/use-toast";
 import { useVegvesenLookup } from "@/hooks/useVegvesenLookup";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import CarClaimDialog from "@/components/CarClaimDialog";
 import { Car, Search, CheckCircle } from "lucide-react";
 
 const AddCar = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { lookupVehicle, saveCar, isLoading } = useVegvesenLookup();
+  const { lookupVehicle, checkAndSaveCar, saveCar, claimCar, isLoading, isClaiming } = useVegvesenLookup();
   const [licensePlate, setLicensePlate] = useState("");
   const [vehicleData, setVehicleData] = useState<any>(null);
+  const [claimDialogOpen, setClaimDialogOpen] = useState(false);
+  const [claimInfo, setClaimInfo] = useState<any>(null);
 
   // Manual car data form
   const [manualData, setManualData] = useState({
@@ -47,9 +50,25 @@ const AddCar = () => {
   const handleSaveVegvesenData = async () => {
     if (!vehicleData) return;
 
-    const saved = await saveCar(vehicleData);
-    if (saved) {
+    const result = await checkAndSaveCar(vehicleData);
+    if (result.success) {
       // Reset form
+      setVehicleData(null);
+      setLicensePlate("");
+    } else if (result.claimInfo) {
+      // Show claim dialog
+      setClaimInfo(result.claimInfo);
+      setClaimDialogOpen(true);
+    }
+  };
+
+  const handleClaimCar = async () => {
+    if (!claimInfo?.car_id) return;
+    
+    const success = await claimCar(claimInfo.car_id);
+    if (success) {
+      setClaimDialogOpen(false);
+      setClaimInfo(null);
       setVehicleData(null);
       setLicensePlate("");
     }
@@ -78,8 +97,8 @@ const AddCar = () => {
       mileage: manualData.mileage ? parseInt(manualData.mileage) : undefined
     };
 
-    const saved = await saveCar(carData);
-    if (saved) {
+    const result = await checkAndSaveCar(carData);
+    if (result.success) {
       // Reset form
       setManualData({
         make: "",
@@ -90,6 +109,10 @@ const AddCar = () => {
         engineSize: ""
       });
       setLicensePlate("");
+    } else if (result.claimInfo) {
+      // Show claim dialog
+      setClaimInfo(result.claimInfo);
+      setClaimDialogOpen(true);
     }
   };
 
@@ -152,7 +175,7 @@ const AddCar = () => {
                   </div>
                   
                   <div className="flex gap-2">
-                    <Button onClick={handleSaveVegvesenData} className="flex-1">
+                    <Button onClick={handleSaveVegvesenData} className="flex-1" disabled={isLoading}>
                       Registrer bil
                     </Button>
                     <Button 
@@ -267,13 +290,25 @@ const AddCar = () => {
                   </div>
                 </div>
 
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full" disabled={isLoading}>
                   Registrer bil
                 </Button>
               </form>
             </CardContent>
           </Card>
         </div>
+
+        {/* Car Claim Dialog */}
+        {claimInfo && (
+          <CarClaimDialog
+            isOpen={claimDialogOpen}
+            onClose={() => setClaimDialogOpen(false)}
+            onClaim={handleClaimCar}
+            carInfo={claimInfo.car_info}
+            documentCount={claimInfo.document_count || 0}
+            isClaiming={isClaiming}
+          />
+        )}
       </div>
       
       <Footer />

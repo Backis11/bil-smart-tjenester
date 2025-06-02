@@ -4,12 +4,14 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useCarClaim } from "./useCarClaim";
 
 export const useVegvesenLookup = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { checkCarRegistration, claimCar, isChecking, isClaiming } = useCarClaim();
 
   const lookupVehicle = async (licensePlate: string) => {
     if (!user) {
@@ -77,6 +79,41 @@ export const useVegvesenLookup = () => {
     }
   };
 
+  const checkAndSaveCar = async (carData: any) => {
+    if (!user) {
+      toast({
+        title: "Feil",
+        description: "Du må være logget inn for å registrere en bil",
+        variant: "destructive"
+      });
+      return { success: false, claimInfo: null };
+    }
+
+    // First check if the car can be registered or needs to be claimed
+    const claimResult = await checkCarRegistration(carData.licensePlate);
+    
+    if (!claimResult) {
+      return { success: false, claimInfo: null };
+    }
+
+    if (claimResult.action === 'conflict') {
+      toast({
+        title: "Bil allerede registrert",
+        description: claimResult.message,
+        variant: "destructive"
+      });
+      return { success: false, claimInfo: null };
+    }
+
+    if (claimResult.action === 'claim_existing') {
+      // Return claim info for the UI to handle
+      return { success: false, claimInfo: claimResult };
+    }
+
+    // If action is 'create_new', proceed with normal car creation
+    return await saveCar(carData);
+  };
+
   const saveCar = async (carData: any) => {
     if (!user) {
       toast({
@@ -84,7 +121,7 @@ export const useVegvesenLookup = () => {
         description: "Du må være logget inn for å registrere en bil",
         variant: "destructive"
       });
-      return false;
+      return { success: false, claimInfo: null };
     }
 
     try {
@@ -104,7 +141,7 @@ export const useVegvesenLookup = () => {
           description: "Kunne ikke sjekke eksisterende bildata",
           variant: "destructive"
         });
-        return false;
+        return { success: false, claimInfo: null };
       }
 
       if (existingCar) {
@@ -113,7 +150,7 @@ export const useVegvesenLookup = () => {
           description: "Du har allerede registrert denne bilen som aktiv",
           variant: "destructive"
         });
-        return false;
+        return { success: false, claimInfo: null };
       }
 
       // Check if there's a deleted car with the same license plate that we can reactivate
@@ -187,7 +224,7 @@ export const useVegvesenLookup = () => {
           description: "Kunne ikke registrere bilen",
           variant: "destructive"
         });
-        return false;
+        return { success: false, claimInfo: null };
       }
 
       toast({
@@ -198,7 +235,7 @@ export const useVegvesenLookup = () => {
       });
 
       navigate('/');
-      return true;
+      return { success: true, claimInfo: null };
     } catch (error) {
       console.error('Error saving car:', error);
       toast({
@@ -206,13 +243,24 @@ export const useVegvesenLookup = () => {
         description: "En uventet feil oppstod ved registrering",
         variant: "destructive"
       });
-      return false;
+      return { success: false, claimInfo: null };
     }
+  };
+
+  const handleClaimCar = async (carId: string) => {
+    const success = await claimCar(carId);
+    if (success) {
+      navigate('/');
+    }
+    return success;
   };
 
   return {
     lookupVehicle,
+    checkAndSaveCar,
     saveCar,
-    isLoading
+    claimCar: handleClaimCar,
+    isLoading: isLoading || isChecking,
+    isClaiming
   };
 };

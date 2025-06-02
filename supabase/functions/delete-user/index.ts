@@ -56,9 +56,9 @@ serve(async (req) => {
 
     console.log('Deleting user and related data for user:', user.id)
 
-    // Delete related data first to avoid foreign key constraint violations
+    // Delete related data but preserve cars and transferable documents
     
-    // 1. Delete documents for user's cars
+    // 1. Delete non-transferable documents only
     const { error: documentsError } = await supabaseAdmin
       .from('documents')
       .delete()
@@ -68,9 +68,10 @@ serve(async (req) => {
           .select('id')
           .eq('user_id', user.id)
       )
+      .eq('is_transferable', false)
     
     if (documentsError) {
-      console.error('Error deleting documents:', documentsError)
+      console.error('Error deleting non-transferable documents:', documentsError)
     }
 
     // 2. Delete service requests and related data
@@ -83,16 +84,23 @@ serve(async (req) => {
       console.error('Error deleting service requests:', serviceRequestsError)
     }
 
-    // 3. Delete cars
+    // 3. Set cars to idle status instead of deleting them
+    // This will be handled by the database trigger, but we can also do it explicitly here
     const { error: carsError } = await supabaseAdmin
       .from('cars')
-      .delete()
+      .update({
+        user_id: null,
+        status: 'idle',
+        idle_since: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
       .eq('user_id', user.id)
+      .eq('status', 'active')
     
     if (carsError) {
-      console.error('Error deleting cars:', carsError)
+      console.error('Error setting cars to idle:', carsError)
       return new Response(
-        JSON.stringify({ error: 'Failed to delete user cars: ' + carsError.message }),
+        JSON.stringify({ error: 'Failed to update user cars: ' + carsError.message }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -134,9 +142,12 @@ serve(async (req) => {
       )
     }
 
-    console.log('Successfully deleted user:', user.id)
+    console.log('Successfully deleted user and set cars to idle:', user.id)
     return new Response(
-      JSON.stringify({ success: true, message: 'User and all related data deleted successfully' }),
+      JSON.stringify({ 
+        success: true, 
+        message: 'User deleted successfully. Cars preserved for future owners.' 
+      }),
       { 
         status: 200, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

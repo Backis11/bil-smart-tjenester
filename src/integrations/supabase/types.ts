@@ -65,11 +65,14 @@ export type Database = {
       }
       cars: {
         Row: {
+          claim_attempts: number | null
           created_at: string
           engine_size: string | null
           fuel_type: string | null
           id: string
+          idle_since: string | null
           inspection_due_date: string | null
+          last_claimed_at: string | null
           license_plate: string
           make: string | null
           mileage: number | null
@@ -87,11 +90,14 @@ export type Database = {
           year: number | null
         }
         Insert: {
+          claim_attempts?: number | null
           created_at?: string
           engine_size?: string | null
           fuel_type?: string | null
           id?: string
+          idle_since?: string | null
           inspection_due_date?: string | null
+          last_claimed_at?: string | null
           license_plate: string
           make?: string | null
           mileage?: number | null
@@ -109,11 +115,14 @@ export type Database = {
           year?: number | null
         }
         Update: {
+          claim_attempts?: number | null
           created_at?: string
           engine_size?: string | null
           fuel_type?: string | null
           id?: string
+          idle_since?: string | null
           inspection_due_date?: string | null
+          last_claimed_at?: string | null
           license_plate?: string
           make?: string | null
           mileage?: number | null
@@ -142,6 +151,7 @@ export type Database = {
           file_name: string
           file_size: number
           id: string
+          is_transferable: boolean | null
           mime_type: string
           status: string | null
           storage_path: string
@@ -159,6 +169,7 @@ export type Database = {
           file_name: string
           file_size: number
           id?: string
+          is_transferable?: boolean | null
           mime_type: string
           status?: string | null
           storage_path: string
@@ -176,6 +187,7 @@ export type Database = {
           file_name?: string
           file_size?: number
           id?: string
+          is_transferable?: boolean | null
           mime_type?: string
           status?: string | null
           storage_path?: string
@@ -753,9 +765,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_register_car: {
+        Args: { registration_number: string; requesting_user_id: string }
+        Returns: Json
+      }
       check_api_quota: {
         Args: { user_uuid: string }
         Returns: boolean
+      }
+      claim_idle_car: {
+        Args: { target_car_id: string; claiming_user_id: string }
+        Returns: Json
       }
       create_workshop_from_registration: {
         Args: { registration_id: string }
