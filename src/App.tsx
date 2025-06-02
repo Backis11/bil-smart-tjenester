@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -25,6 +26,8 @@ import ResetPassword from "./pages/ResetPassword";
 import Blog from "./pages/Blog";
 import AddCar from "./pages/AddCar";
 import ServiceRequestThankYou from "./pages/ServiceRequestThankYou";
+import AdminWorkshops from "./pages/AdminWorkshops";
+import WorkshopDirectory from "./pages/WorkshopDirectory";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +76,7 @@ const App = () => (
               </AuthGuard>
             } />
             <Route path="/services" element={<ServiceDiscovery />} />
+            <Route path="/workshops" element={<WorkshopDirectory />} />
             <Route path="/workshop/:id" element={<WorkshopDetail />} />
             <Route path="/get-quote" element={
               <AuthGuard>
@@ -106,6 +110,11 @@ const App = () => (
             <Route path="/add-car" element={
               <AuthGuard>
                 <AddCar />
+              </AuthGuard>
+            } />
+            <Route path="/admin/workshops" element={
+              <AuthGuard>
+                <AdminWorkshops />
               </AuthGuard>
             } />
             <Route path="/workshop-login" element={<WorkshopAuth />} />
