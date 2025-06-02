@@ -31,11 +31,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+
+        // When user confirms email and logs in, create car if it doesn't exist
+        if (event === 'SIGNED_IN' && session?.user) {
+          setTimeout(async () => {
+            await createCarFromUserMetadata(session.user);
+          }, 0);
+        }
       }
     );
 
@@ -48,6 +55,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const createCarFromUserMetadata = async (user: User) => {
+    try {
+      const licensePlate = user.user_metadata?.license_plate;
+      const kmStand = user.user_metadata?.km_stand;
+      
+      if (!licensePlate) return;
+
+      // Check if car already exists
+      const { data: existingCar } = await supabase
+        .from('cars')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('license_plate', licensePlate)
+        .single();
+
+      if (existingCar) return; // Car already exists
+
+      // Create new car
+      const { error } = await supabase
+        .from('cars')
+        .insert({
+          user_id: user.id,
+          license_plate: licensePlate,
+          mileage: kmStand ? parseInt(kmStand) : null,
+          status: 'active'
+        });
+
+      if (error) {
+        console.error('Error creating car:', error);
+      } else {
+        console.log('Car created successfully for user');
+      }
+    } catch (error) {
+      console.error('Error in createCarFromUserMetadata:', error);
+    }
+  };
 
   const signUp = async (email: string, password: string, userData: any) => {
     try {

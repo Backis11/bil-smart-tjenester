@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import AuthGuard from "@/components/AuthGuard";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import RegistrationConfirmation from "./pages/RegistrationConfirmation";
 import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
@@ -40,6 +41,7 @@ const App = () => (
                 <Auth />
               </AuthGuard>
             } />
+            <Route path="/registration-confirmation" element={<RegistrationConfirmation />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/" element={<Index />} />
             <Route path="/blog" element={<Blog />} />

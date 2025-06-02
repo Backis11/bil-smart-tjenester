@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -148,13 +147,8 @@ const Auth = () => {
         return;
       }
       
-      toast({
-        title: "Registrering vellykket!",
-        description: "Du kan nå logge inn med din nye konto",
-      });
-      
-      // Switch to login tab
-      navigate('/auth?tab=login');
+      // Navigate to confirmation page instead of showing toast
+      navigate('/registration-confirmation');
       
     } catch (error: any) {
       toast({
