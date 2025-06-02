@@ -37,6 +37,8 @@ export const useDocuments = () => {
     if (!user) return;
 
     try {
+      console.log('Fetching documents for user:', user.id);
+      
       const { data, error } = await supabase
         .from('documents')
         .select(`
@@ -51,6 +53,7 @@ export const useDocuments = () => {
         throw error;
       }
 
+      console.log('Fetched documents:', data);
       setDocuments(data || []);
     } catch (error) {
       console.error('Error fetching documents:', error);
@@ -87,13 +90,33 @@ export const useDocuments = () => {
     setUploading(true);
 
     try {
-      // Upload file to storage
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        throw new Error('Fil for stor. Maksimal størrelse er 10MB.');
+      }
+
+      // Validate file type
+      const allowedTypes = [
+        'application/pdf',
+        'image/jpeg',
+        'image/jpg', 
+        'image/png',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      ];
+      
+      if (!allowedTypes.includes(file.type)) {
+        throw new Error('Ugyldig filtype. Støttede typer: PDF, JPG, PNG, DOC, DOCX');
+      }
+
+      // Create file path following the pattern expected by storage policies
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `${user.id}/${carId}/${fileName}`;
 
       console.log('Uploading file to path:', filePath);
 
+      // Upload file to storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('bilmappa-files')
         .upload(filePath, file, {
@@ -128,7 +151,7 @@ export const useDocuments = () => {
 
       if (dbError) {
         console.error('Database insert error:', dbError);
-        // Try to clean up uploaded file if database insert fails
+        // Clean up uploaded file if database insert fails
         await supabase.storage
           .from('bilmappa-files')
           .remove([uploadData.path]);
@@ -153,6 +176,8 @@ export const useDocuments = () => {
           errorMessage = "Du har ikke tilgang til å laste opp dokumenter for denne bilen";
         } else if (error.message.includes('storage')) {
           errorMessage = "Feil ved opplasting av fil. Prøv igjen.";
+        } else if (error.message.includes('Fil for stor') || error.message.includes('Ugyldig filtype')) {
+          errorMessage = error.message;
         }
       }
       
@@ -206,6 +231,7 @@ export const useDocuments = () => {
       // Find the document to get storage path for cleanup
       const documentToDelete = documents.find(doc => doc.id === documentId);
       
+      // Mark document as archived in database
       const { error } = await supabase
         .from('documents')
         .update({ status: 'archived' })
@@ -216,7 +242,7 @@ export const useDocuments = () => {
         throw error;
       }
 
-      // Optionally delete file from storage
+      // Delete file from storage
       if (documentToDelete?.storage_path) {
         const { error: storageError } = await supabase.storage
           .from('bilmappa-files')
