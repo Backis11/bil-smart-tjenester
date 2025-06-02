@@ -57,7 +57,7 @@ export const useCarClaim = () => {
         return null;
       }
 
-      return data as CarClaimResult;
+      return data as unknown as CarClaimResult;
     } catch (error) {
       console.error('Car registration check error:', error);
       toast({
@@ -99,7 +99,7 @@ export const useCarClaim = () => {
         return false;
       }
 
-      const result = data as ClaimCarResult;
+      const result = data as unknown as ClaimCarResult;
 
       if (!result.success) {
         toast({
