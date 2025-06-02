@@ -51,8 +51,12 @@ const Settings = () => {
     
     setIsDeleting(true);
     try {
-      // Delete the user account from Supabase Auth
-      const { error } = await supabase.auth.admin.deleteUser(user.id);
+      // Call our edge function to delete the user
+      const { data, error } = await supabase.functions.invoke('delete-user', {
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+        },
+      });
       
       if (error) throw error;
 
