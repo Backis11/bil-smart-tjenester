@@ -6,7 +6,7 @@ export const workshopService = {
   async searchWorkshops(filters: WorkshopSearchFilters): Promise<Workshop[]> {
     let query = supabase
       .from('workshops')
-      .select('*')
+      .select('id, name, address, certifications, org_number, approval_number, created_at, updated_at')
       .order('name');
 
     if (filters.certification) {
@@ -61,7 +61,7 @@ export const workshopService = {
   async getAllWorkshops(): Promise<Workshop[]> {
     const { data, error } = await supabase
       .from('workshops')
-      .select('*')
+      .select('id, name, address, certifications, org_number, approval_number, created_at, updated_at')
       .order('name');
 
     if (error) {
