@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -26,6 +25,7 @@ const WorkshopRegister = () => {
     website: "",
     services: [] as string[],
   });
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -47,6 +47,16 @@ const WorkshopRegister = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!acceptedTerms) {
+      toast({
+        title: "Betingelser må godtas",
+        description: "Du må godta vilkårene og betingelsene for å fortsette.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
 
     try {
@@ -243,7 +253,39 @@ const WorkshopRegister = () => {
                 </div>
               </div>
               
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {/* Vilkår og betingelser */}
+              <div className="space-y-4">
+                <div className="flex items-start space-x-3 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                  <Checkbox
+                    id="terms"
+                    checked={acceptedTerms}
+                    onCheckedChange={(checked) => setAcceptedTerms(checked as boolean)}
+                    className="mt-1"
+                  />
+                  <div className="flex-1">
+                    <Label htmlFor="terms" className="text-sm font-medium cursor-pointer">
+                      Jeg godtar{" "}
+                      <Link to="/terms" className="text-blue-600 hover:underline" target="_blank">
+                        vilkårene og betingelsene
+                      </Link>
+                      {" "}og{" "}
+                      <Link to="/privacy" className="text-blue-600 hover:underline" target="_blank">
+                        personvernreglene
+                      </Link>
+                      {" "}for Wrench-tjenesten *
+                    </Label>
+                    <p className="text-xs text-gray-600 mt-1">
+                      Ved å registrere ditt verksted godtar du våre vilkår for bruk av plattformen og behandling av kundedata.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={isSubmitting || !acceptedTerms}
+              >
                 {isSubmitting ? "Sender registrering..." : "Send registrering"}
               </Button>
               

@@ -692,7 +692,7 @@ export type Database = {
         Row: {
           address: string
           approval_number: number | null
-          certifications: string[]
+          certifications: string[] | null
           city: string
           contact_person: string | null
           created_at: string | null
@@ -717,7 +717,7 @@ export type Database = {
         Insert: {
           address: string
           approval_number?: number | null
-          certifications?: string[]
+          certifications?: string[] | null
           city: string
           contact_person?: string | null
           created_at?: string | null
@@ -742,7 +742,7 @@ export type Database = {
         Update: {
           address?: string
           approval_number?: number | null
-          certifications?: string[]
+          certifications?: string[] | null
           city?: string
           contact_person?: string | null
           created_at?: string | null
