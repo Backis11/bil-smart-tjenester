@@ -4,7 +4,7 @@ export interface Workshop {
   name: string;
   address: string;
   certifications: string[];
-  org_number?: number;
+  org_number?: string;
   approval_number?: number;
   created_at: string;
   updated_at: string;

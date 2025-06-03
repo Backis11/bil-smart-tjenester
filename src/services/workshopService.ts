@@ -44,8 +44,8 @@ export const workshopService = {
       city: 'Unknown', // Default value since it's required
       postal_code: '0000', // Default value since it's required
       certifications: row.certifications.split(',').map(cert => cert.trim()).filter(Boolean),
-      org_number: row.Organisasjonsnummer ? parseInt(row.Organisasjonsnummer) : null,
-      approval_number: row.Godkjenningsnummer ? parseInt(row.Godkjenningsnummer) : null
+      org_number: row.Organisasjonsnummer ? String(row.Organisasjonsnummer) : null,
+      approval_number: row.Godkjenningsnummer ? Number(row.Godkjenningsnummer) : null
     }));
 
     const { error } = await supabase
