@@ -691,6 +691,7 @@ export type Database = {
       workshops: {
         Row: {
           address: string
+          certifications: string[]
           city: string
           contact_person: string | null
           created_at: string | null
@@ -714,6 +715,7 @@ export type Database = {
         }
         Insert: {
           address: string
+          certifications?: string[]
           city: string
           contact_person?: string | null
           created_at?: string | null
@@ -737,6 +739,7 @@ export type Database = {
         }
         Update: {
           address?: string
+          certifications?: string[]
           city?: string
           contact_person?: string | null
           created_at?: string | null

@@ -14,7 +14,7 @@ export const workshopService = {
     }
 
     if (filters.location) {
-      query = query.ilike('address', `%${filters.location}%`);
+      query = query.or(`address.ilike.%${filters.location}%,city.ilike.%${filters.location}%`);
     }
 
     const { data, error } = await query;
@@ -24,13 +24,25 @@ export const workshopService = {
       throw error;
     }
 
-    return data || [];
+    // Map database results to Workshop interface
+    return (data || []).map(workshop => ({
+      id: workshop.id,
+      name: workshop.name,
+      address: workshop.address,
+      certifications: workshop.certifications || [],
+      org_number: workshop.org_number,
+      approval_number: workshop.approval_number,
+      created_at: workshop.created_at,
+      updated_at: workshop.updated_at
+    }));
   },
 
   async importWorkshopsFromCSV(csvData: WorkshopCSVRow[]): Promise<void> {
     const workshopsToInsert = csvData.map(row => ({
       name: row.name.trim(),
       address: row.address.trim(),
+      city: 'Unknown', // Default value since it's required
+      postal_code: '0000', // Default value since it's required
       certifications: row.certifications.split(',').map(cert => cert.trim()).filter(Boolean),
       org_number: row.Organisasjonsnummer ? parseInt(row.Organisasjonsnummer) : null,
       approval_number: row.Godkjenningsnummer ? parseInt(row.Godkjenningsnummer) : null
@@ -57,6 +69,16 @@ export const workshopService = {
       throw error;
     }
 
-    return data || [];
+    // Map database results to Workshop interface
+    return (data || []).map(workshop => ({
+      id: workshop.id,
+      name: workshop.name,
+      address: workshop.address,
+      certifications: workshop.certifications || [],
+      org_number: workshop.org_number,
+      approval_number: workshop.approval_number,
+      created_at: workshop.created_at,
+      updated_at: workshop.updated_at
+    }));
   }
 };
