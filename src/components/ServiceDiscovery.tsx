@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,17 +7,16 @@ import { Badge } from "@/components/ui/badge";
 import { 
   Search, 
   MapPin, 
-  Star, 
-  Filter,
   Map,
   List
 } from "lucide-react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import MobileOptimizedCard from "@/components/MobileOptimizedCard";
 import ResponsiveGrid from "@/components/ResponsiveGrid";
-import { workshopService } from "@/services/workshopService";
+import WorkshopDetailModal from "@/components/workshop/WorkshopDetailModal";
+import { useWorkshops } from "@/hooks/useWorkshops";
 import type { Workshop } from "@/types/workshop";
 
 const ServiceDiscovery = () => {
@@ -27,8 +26,10 @@ const ServiceDiscovery = () => {
   const [searchTerm, setSearchTerm] = useState(initialSearch);
   const [selectedFilter, setSelectedFilter] = useState("Alle");
   const [viewMode, setViewMode] = useState<"list" | "map">("list");
-  const [workshops, setWorkshops] = useState<Workshop[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [selectedWorkshop, setSelectedWorkshop] = useState<Workshop | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const { workshops, totalCount, isLoading } = useWorkshops();
 
   const filters = ["Alle", "BILVERKSTED", "KONTROLLORGAN", "DEKK", "LAKK", "BREMSE"];
   const filterLabels: Record<string, string> = {
@@ -40,35 +41,24 @@ const ServiceDiscovery = () => {
     "BREMSE": "Bremse"
   };
 
-  useEffect(() => {
-    loadWorkshops();
-  }, []);
-
-  const loadWorkshops = async () => {
-    try {
-      const data = await workshopService.getAllWorkshops();
-      setWorkshops(data);
-    } catch (error) {
-      console.error('Failed to load workshops:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const filteredWorkshops = workshops.filter(workshop => {
-    const matchesSearch = workshop.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         workshop.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         workshop.certifications.some(cert => 
-                           cert.toLowerCase().includes(searchTerm.toLowerCase())
-                         );
-    const matchesFilter = selectedFilter === "Alle" || 
-                         workshop.certifications.some(cert => 
-                           cert.includes(selectedFilter)
-                         );
-    return matchesSearch && matchesFilter;
-  });
+  const filteredWorkshops = useMemo(() => {
+    return workshops.filter(workshop => {
+      const matchesSearch = !searchTerm || 
+        workshop.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        workshop.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (workshop.city && workshop.city.toLowerCase().includes(searchTerm.toLowerCase()));
+      
+      const matchesFilter = selectedFilter === "Alle" || 
+        (workshop.certifications && workshop.certifications.some(cert => 
+          cert.includes(selectedFilter)
+        ));
+      
+      return matchesSearch && matchesFilter;
+    });
+  }, [workshops, searchTerm, selectedFilter]);
 
   const formatCertifications = (certifications: string[]) => {
+    if (!certifications) return [];
     return certifications.map(cert => {
       if (cert.includes('BILVERKSTED')) return 'Bilverksted';
       if (cert.includes('KONTROLLORGAN')) return 'EU-kontroll';
@@ -79,12 +69,17 @@ const ServiceDiscovery = () => {
     });
   };
 
+  const handleWorkshopClick = (workshop: Workshop) => {
+    setSelectedWorkshop(workshop);
+    setIsModalOpen(true);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
         <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
-          <div className="text-center">Loading workshops...</div>
+          <div className="text-center">Laster verksteder fra database...</div>
         </div>
         <Footer />
       </div>
@@ -99,7 +94,6 @@ const ServiceDiscovery = () => {
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Finn verksted</h1>
           
-          {/* Search and Filters */}
           <div className="space-y-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -127,7 +121,7 @@ const ServiceDiscovery = () => {
             
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
               <p className="text-gray-600 text-sm">
-                {filteredWorkshops.length} verksteder funnet
+                {filteredWorkshops.length} verksteder funnet (av totalt {totalCount})
               </p>
               
               <div className="flex gap-2">
@@ -154,62 +148,66 @@ const ServiceDiscovery = () => {
           </div>
         </div>
 
-        {viewMode === "map" ? (
-          <div className="bg-gray-200 rounded-lg h-64 sm:h-96 flex items-center justify-center mb-6 sm:mb-8">
-            <p className="text-gray-600">Kartvisning kommer snart</p>
-          </div>
-        ) : null}
-
-        {/* Workshop List */}
         <ResponsiveGrid columns={{ mobile: 1, tablet: 2, desktop: 3 }}>
           {filteredWorkshops.map((workshop) => (
-            <MobileOptimizedCard key={workshop.id} className="h-full">
+            <MobileOptimizedCard 
+              key={workshop.id} 
+              className="h-full hover:shadow-lg transition-all duration-200 cursor-pointer hover:scale-[1.02]"
+              onClick={() => handleWorkshopClick(workshop)}
+            >
               <CardContent className="p-4 sm:p-6">
-                <div className="flex justify-between items-start mb-3 sm:mb-4">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-base sm:text-lg mb-1 line-clamp-1">{workshop.name}</h3>
-                    <div className="flex items-center text-xs sm:text-sm text-gray-600 mb-2">
-                      <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
-                      <span className="truncate">{workshop.address}</span>
-                    </div>
+                <div className="space-y-3">
+                  <h3 className="font-bold text-base sm:text-lg line-clamp-2">{workshop.name}</h3>
+                  
+                  <div className="flex items-start gap-2 text-xs sm:text-sm text-gray-600">
+                    <MapPin className="h-3 w-3 sm:h-4 sm:w-4 mt-0.5 flex-shrink-0" />
+                    <span className="line-clamp-2">{workshop.address}</span>
                   </div>
-                </div>
-                
-                <div className="flex items-center mb-3">
-                  <Star className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-400 fill-current" />
-                  <span className="text-xs sm:text-sm text-gray-600 ml-1">4.5</span>
-                  <span className="text-gray-400 mx-1">•</span>
-                  <span className="text-xs sm:text-sm text-gray-600">25 anmeldelser</span>
-                </div>
-                
-                <div className="space-y-2">
+                  
                   {workshop.org_number && (
-                    <p className="text-xs sm:text-sm text-gray-500">Org: {workshop.org_number}</p>
+                    <p className="text-xs sm:text-sm text-gray-500">
+                      Org: {workshop.org_number}
+                    </p>
                   )}
-                  <div className="flex flex-wrap gap-1">
-                    {formatCertifications(workshop.certifications).slice(0, 3).map((cert, idx) => (
-                      <Badge key={idx} variant="secondary" className="text-xs">
-                        {cert}
-                      </Badge>
-                    ))}
-                    {workshop.certifications.length > 3 && (
-                      <Badge variant="outline" className="text-xs">
-                        +{workshop.certifications.length - 3} flere
-                      </Badge>
-                    )}
-                  </div>
+
+                  {workshop.certifications && workshop.certifications.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {formatCertifications(workshop.certifications).slice(0, 3).map((cert, idx) => (
+                        <Badge key={idx} variant="secondary" className="text-xs">
+                          {cert}
+                        </Badge>
+                      ))}
+                      {workshop.certifications.length > 3 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{workshop.certifications.length - 3} flere
+                        </Badge>
+                      )}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </MobileOptimizedCard>
           ))}
         </ResponsiveGrid>
 
-        {filteredWorkshops.length === 0 && (
+        {filteredWorkshops.length === 0 && workshops.length > 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500">Ingen verksteder funnet som matcher søket ditt.</p>
           </div>
         )}
+
+        {workshops.length === 0 && !isLoading && (
+          <div className="text-center py-12">
+            <p className="text-gray-500">Ingen verksteder funnet i databasen.</p>
+          </div>
+        )}
       </div>
+
+      <WorkshopDetailModal
+        workshop={selectedWorkshop}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
 
       <Footer />
     </div>
