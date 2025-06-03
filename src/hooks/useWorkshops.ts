@@ -27,7 +27,7 @@ export const useWorkshops = () => {
       // Get workshop data
       const { data, error } = await supabase
         .from('workshops')
-        .select('id, name, address, city, org_number, certifications')
+        .select('id, name, address, city, org_number, certifications, created_at, updated_at')
         .eq('is_active', true)
         .order('name');
 
@@ -35,7 +35,18 @@ export const useWorkshops = () => {
         console.error('Error fetching workshops:', error);
         setWorkshops([]);
       } else {
-        setWorkshops(data || []);
+        // Map the data to ensure all required fields are present
+        const mappedData: Workshop[] = (data || []).map(workshop => ({
+          id: workshop.id,
+          name: workshop.name,
+          address: workshop.address,
+          city: workshop.city,
+          org_number: workshop.org_number,
+          certifications: workshop.certifications || [],
+          created_at: workshop.created_at,
+          updated_at: workshop.updated_at,
+        }));
+        setWorkshops(mappedData);
       }
     } catch (error) {
       console.error('Failed to fetch workshops:', error);

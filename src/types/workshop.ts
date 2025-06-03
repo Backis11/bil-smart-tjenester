@@ -3,6 +3,7 @@ export interface Workshop {
   id: string;
   name: string;
   address: string;
+  city?: string;
   certifications: string[];
   org_number?: string;
   approval_number?: number;
