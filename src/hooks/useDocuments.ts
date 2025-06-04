@@ -15,11 +15,16 @@ export const useDocuments = () => {
   const { user } = useAuth();
 
   const fetchDocuments = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('No user found when fetching documents');
+      setLoading(false);
+      return;
+    }
 
     try {
       console.log('Fetching documents for user:', user.id);
       const data = await fetchDocumentsFromDatabase();
+      console.log('Fetched documents:', data);
       setDocuments(data);
     } catch (error) {
       console.error('Error fetching documents:', error);
@@ -39,6 +44,7 @@ export const useDocuments = () => {
     documentData: DocumentUploadData
   ) => {
     if (!user) {
+      console.error('No user found when uploading document');
       toast({
         title: "Feil",
         description: "Du må være logget inn for å laste opp dokumenter",
@@ -46,6 +52,11 @@ export const useDocuments = () => {
       });
       return false;
     }
+
+    console.log('Starting document upload for user:', user.id);
+    console.log('Car ID:', carId);
+    console.log('Document data:', documentData);
+    console.log('File:', file.name, file.size);
 
     setUploading(true);
 
@@ -55,12 +66,15 @@ export const useDocuments = () => {
 
       // Create file path following the pattern expected by storage policies
       const filePath = createFilePath(user.id, carId, file.name);
+      console.log('File path:', filePath);
 
       // Upload file to storage
       const uploadData = await uploadFileToStorage(file, filePath);
+      console.log('File uploaded to storage:', uploadData);
 
       // Save document metadata to database
-      await saveDocumentToDatabase(carId, file, uploadData.path, documentData);
+      const documentRecord = await saveDocumentToDatabase(carId, file, uploadData.path, documentData);
+      console.log('Document saved to database:', documentRecord);
 
       toast({
         title: "Dokument lastet opp",
@@ -80,6 +94,8 @@ export const useDocuments = () => {
           errorMessage = "Feil ved opplasting av fil. Prøv igjen.";
         } else if (error.message.includes('Fil for stor') || error.message.includes('Ugyldig filtype')) {
           errorMessage = error.message;
+        } else {
+          errorMessage = `Feil: ${error.message}`;
         }
       }
       
@@ -96,6 +112,7 @@ export const useDocuments = () => {
 
   const downloadDocument = async (document: Document) => {
     try {
+      console.log('Downloading document:', document.id);
       await downloadFileFromStorage(document.storage_path, document.file_name);
     } catch (error) {
       console.error('Error downloading document:', error);

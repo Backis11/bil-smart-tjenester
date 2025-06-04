@@ -23,6 +23,7 @@ export const useCarRegistration = () => {
 
   const saveCar = async (carData: CarData) => {
     if (!user) {
+      console.error('No user found when trying to save car');
       toast({
         title: "Feil",
         description: "Du må være logget inn for å registrere en bil",
@@ -30,6 +31,9 @@ export const useCarRegistration = () => {
       });
       return { success: false, claimInfo: null };
     }
+
+    console.log('Saving car with data:', carData);
+    console.log('User ID:', user.id);
 
     try {
       // Check if there's an existing active car with the same license plate
@@ -76,6 +80,7 @@ export const useCarRegistration = () => {
       let result;
       
       if (deletedCar) {
+        console.log('Reactivating deleted car:', deletedCar.id);
         // Reactivate the deleted car with new data
         const { data, error } = await supabase
           .from('cars')
@@ -100,6 +105,7 @@ export const useCarRegistration = () => {
 
         result = { data, error };
       } else {
+        console.log('Creating new car for user:', user.id);
         // Create a new car
         const { data, error } = await supabase
           .from('cars')
@@ -122,18 +128,20 @@ export const useCarRegistration = () => {
           .single();
 
         result = { data, error };
+        console.log('Car creation result:', result);
       }
 
       if (result.error) {
         console.error('Error saving car:', result.error);
         toast({
           title: "Feil",
-          description: "Kunne ikke registrere bilen",
+          description: `Kunne ikke registrere bilen: ${result.error.message}`,
           variant: "destructive"
         });
         return { success: false, claimInfo: null };
       }
 
+      console.log('Car saved successfully:', result.data);
       toast({
         title: "Bil registrert",
         description: deletedCar 

@@ -44,6 +44,7 @@ export const downloadFileFromStorage = async (storagePath: string, fileName: str
 };
 
 export const deleteFileFromStorage = async (storagePath: string) => {
+  console.log('Deleting file from storage:', storagePath);
   const { error: storageError } = await supabase.storage
     .from('bilmappa-files')
     .remove([storagePath]);
