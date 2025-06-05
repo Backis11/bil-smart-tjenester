@@ -29,14 +29,14 @@ const HeroSection = () => {
           <div className="flex justify-center mb-6">
             <Wrench className="h-16 w-16 text-blue-500" />
           </div>
-          <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6">
-            Din digitale <span className="text-blue-500">bilmappa</span>
-          </h1>
-          <p className="text-xl text-gray-600 mb-2 max-w-2xl mx-auto">
-            Hold orden på bilens viktige dokumenter - enkelt, sikkert og gratis.
+          <p className="text-lg text-gray-600 mb-4">
+            alt om bilen på et sted
           </p>
-          <p className="text-lg text-green-600 font-semibold mb-8">
-            Helt gratis!
+          <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6">
+            Din digitale <span className="text-blue-500">bilmappe</span>
+          </h1>
+          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            Hold orden på bilens viktige dokumenter - enkelt, sikkert og gratis.
           </p>
           
           {/* Quick Actions */}
@@ -44,7 +44,7 @@ const HeroSection = () => {
             <Button variant="outline" size="lg" asChild>
               <Link to="/auth">
                 <FileText className="h-4 w-4 mr-2" />
-                Start din bilmappa
+                Se din bilmappe
               </Link>
             </Button>
             <Button variant="outline" size="lg" asChild>
