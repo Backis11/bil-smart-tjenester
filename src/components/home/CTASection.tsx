@@ -6,7 +6,12 @@ const CTASection = () => {
   return (
     <section className="relative py-20 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 overflow-hidden">
       {/* Background pattern */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M50 0l50 50-50 50L0 50z" fill="%23ffffff" fill-opacity="0.02"/%3E%3C/svg%3E')] opacity-20"></div>
+      <div 
+        className="absolute inset-0 opacity-20"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 0l50 50-50 50L0 50z' fill='%23ffffff' fill-opacity='0.02'/%3E%3C/svg%3E")`
+        }}
+      ></div>
       
       {/* Floating elements */}
       <div className="absolute top-10 left-10 w-24 h-24 bg-white/10 rounded-full blur-xl animate-pulse"></div>
@@ -17,11 +22,8 @@ const CTASection = () => {
         <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
           Klar til å komme i gang?
         </h2>
-        <p className="text-blue-100 text-xl mb-4 max-w-3xl mx-auto">
+        <p className="text-blue-100 text-xl mb-12 max-w-3xl mx-auto">
           Opprett din digitale bilmappa i dag og dokumenter bilens historie
-        </p>
-        <p className="text-yellow-300 font-bold text-lg mb-12">
-          Helt gratis!
         </p>
         
         <div className="flex flex-col sm:flex-row gap-6 justify-center">
