@@ -14,11 +14,14 @@ const Footer = () => {
               <Wrench className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500" />
               <div>
                 <h3 className="text-lg sm:text-xl font-bold text-white">Wrench</h3>
-                <p className="text-xs text-gray-400">din digitale bilmappe</p>
+                <p className="text-xs text-gray-400">din digitale bilmappa</p>
               </div>
             </Link>
-            <p className="text-sm text-gray-400 mb-4 leading-relaxed">
-              Den komplette plattformen for å administrere din bil - fra service til dokumenter og verdivurdering.
+            <p className="text-sm text-gray-400 mb-2 leading-relaxed">
+              Den komplette plattformen for å dokumentere bilens historie og få verdi ved salg.
+            </p>
+            <p className="text-sm text-green-400 font-semibold mb-4">
+              Helt gratis!
             </p>
             <div className="flex space-x-4">
               <Facebook className="h-5 w-5 text-gray-400 hover:text-blue-500 cursor-pointer transition-colors active:scale-95" />
@@ -33,29 +36,24 @@ const Footer = () => {
             <h4 className="text-base sm:text-lg font-semibold text-white mb-4">Tjenester</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/services" className="text-sm text-gray-400 hover:text-white transition-colors active:text-blue-400">
-                  Finn verksted
+                <Link to="/auth" className="text-sm text-gray-400 hover:text-white transition-colors active:text-blue-400">
+                  Start din bilmappa
                 </Link>
               </li>
               <li>
-                <Link to="/valuation" className="text-sm text-gray-400 hover:text-white transition-colors active:text-blue-400">
-                  Verdivurdering
+                <Link to="/auth" className="text-sm text-gray-400 hover:text-white transition-colors active:text-blue-400">
+                  Dokumenter historie
                 </Link>
               </li>
               <li>
-                <Link to="/get-quote" className="text-sm text-gray-400 hover:text-white transition-colors active:text-blue-400">
-                  Få tilbud
-                </Link>
+                <a href="#" className="text-sm text-gray-400 hover:text-white transition-colors active:text-blue-400">
+                  Verdi ved salg (kommer snart)
+                </a>
               </li>
               <li>
-                <Link to="/documents" className="text-sm text-gray-400 hover:text-white transition-colors active:text-blue-400">
-                  Dokumenter
-                </Link>
-              </li>
-              <li>
-                <Link to="/sell-car" className="text-sm text-gray-400 hover:text-white transition-colors active:text-blue-400">
-                  Selg bil
-                </Link>
+                <a href="#" className="text-sm text-gray-400 hover:text-white transition-colors active:text-blue-400">
+                  Finn verksted (kommer snart)
+                </a>
               </li>
             </ul>
           </div>

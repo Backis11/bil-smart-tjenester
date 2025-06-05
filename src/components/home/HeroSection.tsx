@@ -7,7 +7,7 @@ import {
   Search, 
   Wrench, 
   Users,
-  Building2 
+  FileText 
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -30,10 +30,13 @@ const HeroSection = () => {
             <Wrench className="h-16 w-16 text-blue-500" />
           </div>
           <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6">
-            Din digitale <span className="text-blue-500">bilmappe</span>
+            Din digitale <span className="text-blue-500">bilmappa</span>
           </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Hold orden på bilens historie, finn riktig verksted og få tilbud på service og reparasjoner
+          <p className="text-xl text-gray-600 mb-2 max-w-2xl mx-auto">
+            Dokumenter bilens historie og få verdi ved salg
+          </p>
+          <p className="text-lg text-green-600 font-semibold mb-8">
+            Helt gratis!
           </p>
           
           {/* Search */}
@@ -57,21 +60,15 @@ const HeroSection = () => {
           {/* Quick Actions */}
           <div className="flex flex-wrap gap-4 justify-center">
             <Button variant="outline" size="lg" asChild>
-              <Link to="/services">
-                <Search className="h-4 w-4 mr-2" />
-                Finn verksted
+              <Link to="/auth">
+                <FileText className="h-4 w-4 mr-2" />
+                Start din bilmappa
               </Link>
             </Button>
             <Button variant="outline" size="lg" asChild>
               <Link to="/auth">
                 <Users className="h-4 w-4 mr-2" />
-                Min bilmappe
-              </Link>
-            </Button>
-            <Button variant="outline" size="lg" asChild>
-              <Link to="/workshop-register">
-                <Building2 className="h-4 w-4 mr-2" />
-                Registrer verksted
+                Logg inn
               </Link>
             </Button>
           </div>
