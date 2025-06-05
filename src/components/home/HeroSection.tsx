@@ -29,9 +29,6 @@ const HeroSection = () => {
           <div className="flex justify-center mb-6">
             <Wrench className="h-16 w-16 text-blue-500" />
           </div>
-          <p className="text-lg text-gray-600 mb-4">
-            alt om bilen på et sted
-          </p>
           <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6">
             Din digitale <span className="text-blue-500">bilmappe</span>
           </h1>
