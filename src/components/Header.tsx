@@ -50,8 +50,8 @@ const Header = () => {
           <Link to="/" className="flex items-center space-x-2 flex-shrink-0">
             <Wrench className="h-8 w-8 text-blue-500" />
             <div className="hidden sm:block">
-              <h1 className="text-xl font-bold text-gray-900">Wrench</h1>
-              <p className="text-xs text-gray-500">din digitale bilmappe</p>
+              <h1 className="text-xl font-bold text-gray-900">Bilmappa</h1>
+              <p className="text-xs text-gray-500">din digitale bilmappa</p>
             </div>
           </Link>
 

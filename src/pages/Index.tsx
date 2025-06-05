@@ -6,7 +6,6 @@ import ServiceCards from "@/components/ServiceCards";
 import UserCarsSection from "@/components/UserCarsSection";
 import HeroSection from "@/components/home/HeroSection";
 import FeaturesSection from "@/components/home/FeaturesSection";
-import FeaturedWorkshopsSection from "@/components/home/FeaturedWorkshopsSection";
 import CTASection from "@/components/home/CTASection";
 
 const Index = () => {
@@ -32,7 +31,6 @@ const Index = () => {
       <Header />
       <HeroSection />
       <FeaturesSection />
-      <FeaturedWorkshopsSection />
       <CTASection />
       <Footer />
     </div>

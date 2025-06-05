@@ -13,12 +13,12 @@ const Footer = () => {
             <Link to="/" className="flex items-center space-x-2 mb-4">
               <Wrench className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500" />
               <div>
-                <h3 className="text-lg sm:text-xl font-bold text-white">Wrench</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-white">Bilmappa</h3>
                 <p className="text-xs text-gray-400">din digitale bilmappa</p>
               </div>
             </Link>
             <p className="text-sm text-gray-400 mb-2 leading-relaxed">
-              Den komplette plattformen for å dokumentere bilens historie og få verdi ved salg.
+              Hold orden på bilens viktige dokumenter - enkelt, sikkert og gratis.
             </p>
             <p className="text-sm text-green-400 font-semibold mb-4">
               Helt gratis!
@@ -50,11 +50,6 @@ const Footer = () => {
                   Verdi ved salg (kommer snart)
                 </a>
               </li>
-              <li>
-                <a href="#" className="text-sm text-gray-400 hover:text-white transition-colors active:text-blue-400">
-                  Finn verksted (kommer snart)
-                </a>
-              </li>
             </ul>
           </div>
 
@@ -78,11 +73,6 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/workshop-login" className="text-sm text-gray-400 hover:text-white transition-colors active:text-blue-400">
-                  For verksteder
-                </Link>
-              </li>
-              <li>
                 <a href="#" className="text-sm text-gray-400 hover:text-white transition-colors active:text-blue-400">
                   Kontakt oss
                 </a>
@@ -96,7 +86,7 @@ const Footer = () => {
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
                 <Mail className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                <span className="text-sm text-gray-400">hei@wrench.no</span>
+                <span className="text-sm text-gray-400">hei@bilmappa.no</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" />
@@ -134,7 +124,7 @@ const Footer = () => {
             </a>
           </div>
           <p className="text-xs text-gray-500">
-            © 2024 Wrench AS. Alle rettigheter forbeholdt.
+            © 2024 Bilmappa AS. Alle rettigheter forbeholdt.
           </p>
         </div>
       </div>

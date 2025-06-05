@@ -33,30 +33,12 @@ const HeroSection = () => {
             Din digitale <span className="text-blue-500">bilmappa</span>
           </h1>
           <p className="text-xl text-gray-600 mb-2 max-w-2xl mx-auto">
-            Dokumenter bilens historie og få verdi ved salg
+            Hold orden på bilens viktige dokumenter - enkelt, sikkert og gratis.
           </p>
           <p className="text-lg text-green-600 font-semibold mb-8">
             Helt gratis!
           </p>
           
-          {/* Search */}
-          <div className="max-w-2xl mx-auto mb-8">
-            <form onSubmit={handleSearch} className="flex gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                <Input
-                  placeholder="Søk etter verksted, by eller tjeneste..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 h-12 text-base"
-                />
-              </div>
-              <Button type="submit" size="lg" className="h-12 px-8">
-                Søk
-              </Button>
-            </form>
-          </div>
-
           {/* Quick Actions */}
           <div className="flex flex-wrap gap-4 justify-center">
             <Button variant="outline" size="lg" asChild>
