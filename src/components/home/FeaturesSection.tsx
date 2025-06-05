@@ -1,32 +1,32 @@
 
 import { 
-  Search, 
+  FileText, 
   Shield, 
-  Clock, 
-  Users
+  TrendingUp, 
+  Clock
 } from "lucide-react";
 
 const FeaturesSection = () => {
   const features = [
     {
-      icon: Search,
-      title: "Finn riktig verksted",
-      description: "Søk blant hundrevis av kvalitetssikrede verksteder i hele Norge"
+      icon: FileText,
+      title: "Dokumenter bilens historie",
+      description: "Hold orden på alle viktige dokumenter og service på ett sted"
     },
     {
       icon: Shield,
       title: "Trygg og sikker",
-      description: "Alle verksteder er verifiserte og kvalitetssikret for din trygghet"
+      description: "Alle dokumenter lagres sikkert og er alltid tilgjengelige for deg"
+    },
+    {
+      icon: TrendingUp,
+      title: "Øk verdien ved salg",
+      description: "Komplett dokumentasjon øker bilens verdi når du skal selge"
     },
     {
       icon: Clock,
       title: "Spare tid",
-      description: "Sammenlign priser og book time direkte fra appen"
-    },
-    {
-      icon: Users,
-      title: "Ekte anmeldelser",
-      description: "Les anmeldelser fra ekte kunder før du velger verksted"
+      description: "Finn raskt fram dokumenter når du trenger dem"
     }
   ];
 
@@ -35,7 +35,7 @@ const FeaturesSection = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Hvorfor velge Wrench?
+            Hvorfor velge Bilmappa?
           </h2>
           <p className="text-gray-600 text-lg">
             Vi gjør det enkelt å ta vare på bilen din
