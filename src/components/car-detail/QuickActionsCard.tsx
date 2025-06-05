@@ -2,6 +2,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Shield, FileText, Gauge } from "lucide-react";
 
 interface QuickActionsCardProps {
@@ -15,24 +16,30 @@ const QuickActionsCard = ({ carId }: QuickActionsCardProps) => {
         <CardTitle>Hurtighandlinger</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        <Link to="/services">
-          <Button variant="outline" className="w-full justify-start">
+        <div className="relative">
+          <Button variant="outline" className="w-full justify-start opacity-50" disabled>
             <Shield className="h-4 w-4 mr-2" />
             Book service
           </Button>
-        </Link>
+          <Badge variant="secondary" className="absolute -top-2 -right-2 bg-gray-100 text-gray-600 text-xs">
+            Kommer snart
+          </Badge>
+        </div>
         <Link to="/documents">
           <Button variant="outline" className="w-full justify-start">
             <FileText className="h-4 w-4 mr-2" />
             Se dokumenter
           </Button>
         </Link>
-        <Link to={`/valuation/${carId}`}>
-          <Button variant="outline" className="w-full justify-start">
+        <div className="relative">
+          <Button variant="outline" className="w-full justify-start opacity-50" disabled>
             <Gauge className="h-4 w-4 mr-2" />
             Verdivurdering
           </Button>
-        </Link>
+          <Badge variant="secondary" className="absolute -top-2 -right-2 bg-gray-100 text-gray-600 text-xs">
+            Kommer snart
+          </Badge>
+        </div>
       </CardContent>
     </Card>
   );

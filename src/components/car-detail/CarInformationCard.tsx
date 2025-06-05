@@ -64,38 +64,50 @@ const CarInformationCard = ({
             <Label htmlFor="make">Merke</Label>
             <Input
               id="make"
-              value={editMode ? formData.make || '' : carData.make || ''}
-              onChange={(e) => onFormDataChange({...formData, make: e.target.value})}
-              disabled={!editMode}
+              value={carData.make || ''}
+              disabled
+              className="bg-gray-50"
             />
+            {editMode && (
+              <p className="text-xs text-gray-500 mt-1">Hentet fra Vegvesenet</p>
+            )}
           </div>
           <div>
             <Label htmlFor="model">Modell</Label>
             <Input
               id="model"
-              value={editMode ? formData.model || '' : carData.model || ''}
-              onChange={(e) => onFormDataChange({...formData, model: e.target.value})}
-              disabled={!editMode}
+              value={carData.model || ''}
+              disabled
+              className="bg-gray-50"
             />
+            {editMode && (
+              <p className="text-xs text-gray-500 mt-1">Hentet fra Vegvesenet</p>
+            )}
           </div>
           <div>
             <Label htmlFor="year">Årsmodell</Label>
             <Input
               id="year"
               type="number"
-              value={editMode ? formData.year || '' : carData.year || ''}
-              onChange={(e) => onFormDataChange({...formData, year: parseInt(e.target.value)})}
-              disabled={!editMode}
+              value={carData.year || ''}
+              disabled
+              className="bg-gray-50"
             />
+            {editMode && (
+              <p className="text-xs text-gray-500 mt-1">Hentet fra Vegvesenet</p>
+            )}
           </div>
           <div>
             <Label htmlFor="license_plate">Registreringsnummer</Label>
             <Input
               id="license_plate"
-              value={editMode ? formData.license_plate || '' : carData.license_plate || ''}
-              onChange={(e) => onFormDataChange({...formData, license_plate: e.target.value})}
-              disabled={!editMode}
+              value={carData.license_plate || ''}
+              disabled
+              className="bg-gray-50"
             />
+            {editMode && (
+              <p className="text-xs text-gray-500 mt-1">Hentet fra Vegvesenet</p>
+            )}
           </div>
           <div>
             <Label htmlFor="mileage">Kilometerstand</Label>
@@ -105,25 +117,32 @@ const CarInformationCard = ({
               value={editMode ? formData.mileage || '' : carData.mileage || ''}
               onChange={(e) => onFormDataChange({...formData, mileage: parseInt(e.target.value)})}
               disabled={!editMode}
+              className={!editMode ? "bg-gray-50" : ""}
             />
           </div>
           <div>
             <Label htmlFor="fuel_type">Drivstoff</Label>
             <Input
               id="fuel_type"
-              value={editMode ? formData.fuel_type || '' : carData.fuel_type || ''}
-              onChange={(e) => onFormDataChange({...formData, fuel_type: e.target.value})}
-              disabled={!editMode}
+              value={carData.fuel_type || ''}
+              disabled
+              className="bg-gray-50"
             />
+            {editMode && (
+              <p className="text-xs text-gray-500 mt-1">Hentet fra Vegvesenet</p>
+            )}
           </div>
           <div className="md:col-span-2">
             <Label htmlFor="vin">VIN-nummer</Label>
             <Input
               id="vin"
-              value={editMode ? formData.vin || '' : carData.vin || ''}
-              onChange={(e) => onFormDataChange({...formData, vin: e.target.value})}
-              disabled={!editMode}
+              value={carData.vin || ''}
+              disabled
+              className="bg-gray-50"
             />
+            {editMode && (
+              <p className="text-xs text-gray-500 mt-1">Hentet fra Vegvesenet</p>
+            )}
           </div>
         </div>
       </CardContent>

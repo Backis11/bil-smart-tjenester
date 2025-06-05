@@ -70,30 +70,24 @@ export const useCarData = (carId: string | undefined) => {
       const { error } = await supabase
         .from('cars')
         .update({
-          make: formData.make,
-          model: formData.model,
-          year: formData.year,
-          license_plate: formData.license_plate,
-          mileage: formData.mileage,
-          fuel_type: formData.fuel_type,
-          vin: formData.vin
+          mileage: formData.mileage
         })
         .eq('id', carData.id)
         .eq('user_id', user.id);
 
       if (error) throw error;
 
-      setCarData({ ...carData, ...formData });
+      setCarData({ ...carData, mileage: formData.mileage });
       setEditMode(false);
       toast({
         title: "Bil oppdatert",
-        description: "Informasjonen om bilen din er oppdatert.",
+        description: "Kilometerstanden er oppdatert.",
       });
     } catch (error) {
       console.error('Error updating car:', error);
       toast({
         title: "Feil",
-        description: "Kunne ikke oppdatere bildata",
+        description: "Kunne ikke oppdatere kilometerstand",
         variant: "destructive"
       });
     }
