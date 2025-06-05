@@ -51,7 +51,7 @@ const Header = () => {
             <Wrench className="h-8 w-8 text-blue-500" />
             <div className="hidden sm:block">
               <h1 className="text-xl font-bold text-gray-900">Bilmappa</h1>
-              <p className="text-xs text-gray-500">din digitale bilmappa</p>
+              <p className="text-xs text-gray-500">alt om bilen din på ett sted</p>
             </div>
           </Link>
 

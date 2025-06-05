@@ -14,7 +14,7 @@ const Footer = () => {
               <Wrench className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500" />
               <div>
                 <h3 className="text-lg sm:text-xl font-bold text-white">Bilmappa</h3>
-                <p className="text-xs text-gray-400">din digitale bilmappa</p>
+                <p className="text-xs text-gray-400">alt om bilen din på ett sted</p>
               </div>
             </Link>
             <p className="text-sm text-gray-400 mb-2 leading-relaxed">
