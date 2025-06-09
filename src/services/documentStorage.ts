@@ -54,3 +54,18 @@ export const deleteFileFromStorage = async (storagePath: string) => {
     // Don't throw error for storage cleanup failure
   }
 };
+
+export const getFileFromStorage = async (storagePath: string) => {
+  console.log('Getting file from storage:', storagePath);
+  
+  const { data, error } = await supabase.storage
+    .from('bilmappa-files')
+    .download(storagePath);
+
+  if (error) {
+    console.error('Error getting file from storage:', error);
+    throw error;
+  }
+
+  return data;
+};

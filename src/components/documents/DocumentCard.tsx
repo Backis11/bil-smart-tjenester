@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Download, Calendar, Car, Building2, Trash2 } from "lucide-react";
+import { FileText, Download, Calendar, Car, Building2, Trash2, Eye } from "lucide-react";
 
 interface Document {
   id: string;
@@ -26,9 +26,10 @@ interface DocumentCardProps {
   document: Document;
   onDownload: (document: Document) => void;
   onDelete: (documentId: string) => void;
+  onView: (document: Document) => void;
 }
 
-const DocumentCard = ({ document, onDownload, onDelete }: DocumentCardProps) => {
+const DocumentCard = ({ document, onDownload, onDelete, onView }: DocumentCardProps) => {
   const getDocumentTypeLabel = (type: string) => {
     const types: Record<string, string> = {
       'eu-kontroll': 'EU-kontroll',
@@ -115,6 +116,15 @@ const DocumentCard = ({ document, onDownload, onDelete }: DocumentCardProps) => 
           </div>
           
           <div className="flex gap-2 pt-2">
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="flex-1 flex items-center space-x-2"
+              onClick={() => onView(document)}
+            >
+              <Eye className="h-4 w-4" />
+              <span>Vis</span>
+            </Button>
             <Button 
               size="sm" 
               variant="outline" 

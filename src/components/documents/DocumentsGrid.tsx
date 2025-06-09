@@ -23,9 +23,10 @@ interface DocumentsGridProps {
   documents: Document[];
   onDownload: (document: Document) => void;
   onDelete: (documentId: string) => void;
+  onView: (document: Document) => void;
 }
 
-const DocumentsGrid = ({ documents, onDownload, onDelete }: DocumentsGridProps) => {
+const DocumentsGrid = ({ documents, onDownload, onDelete, onView }: DocumentsGridProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {documents.map((document) => (
@@ -34,6 +35,7 @@ const DocumentsGrid = ({ documents, onDownload, onDelete }: DocumentsGridProps) 
           document={document}
           onDownload={onDownload}
           onDelete={onDelete}
+          onView={onView}
         />
       ))}
     </div>

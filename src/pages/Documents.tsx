@@ -7,9 +7,13 @@ import DocumentsSearch from "@/components/documents/DocumentsSearch";
 import DocumentsGrid from "@/components/documents/DocumentsGrid";
 import DocumentsEmptySearch from "@/components/documents/DocumentsEmptySearch";
 import EmptyDocumentsState from "@/components/documents/EmptyDocumentsState";
+import DocumentViewModal from "@/components/documents/DocumentViewModal";
 
 const Documents = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedDocument, setSelectedDocument] = useState(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  
   const { 
     documents, 
     loading, 
@@ -27,6 +31,16 @@ const Documents = () => {
     doc.car?.model?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     doc.car?.license_plate?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleViewDocument = (document) => {
+    setSelectedDocument(document);
+    setIsViewModalOpen(true);
+  };
+
+  const handleCloseViewModal = () => {
+    setIsViewModalOpen(false);
+    setSelectedDocument(null);
+  };
 
   if (loading) {
     return (
@@ -67,6 +81,7 @@ const Documents = () => {
               documents={filteredDocuments}
               onDownload={downloadDocument}
               onDelete={deleteDocument}
+              onView={handleViewDocument}
             />
             
             {filteredDocuments.length === 0 && searchTerm && (
@@ -75,6 +90,13 @@ const Documents = () => {
           </>
         )}
       </div>
+
+      <DocumentViewModal
+        document={selectedDocument}
+        isOpen={isViewModalOpen}
+        onClose={handleCloseViewModal}
+        onDownload={downloadDocument}
+      />
     </div>
   );
 };
