@@ -7,9 +7,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Upload } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/MockAuthContext";
 import { useToast } from "@/hooks/use-toast";
+
+const CARS_STORAGE_KEY = 'mock_cars_data';
 
 interface Car {
   id: string;
@@ -17,6 +18,7 @@ interface Car {
   model: string;
   year: number;
   license_plate: string;
+  user_id: string;
 }
 
 interface DocumentUploadDialogProps {
@@ -57,22 +59,22 @@ const DocumentUploadDialog = ({ onUpload, uploading }: DocumentUploadDialogProps
     try {
       console.log('Fetching user cars for user:', user.id);
       
-      const { data, error } = await supabase
-        .from('cars')
-        .select('id, make, model, year, license_plate')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching cars:', error);
-        throw error;
-      }
-      
-      console.log('Fetched cars:', data);
-      setCars(data || []);
-      
-      if (!data || data.length === 0) {
+      const data = localStorage.getItem(CARS_STORAGE_KEY);
+      if (data) {
+        const allCars: Car[] = JSON.parse(data);
+        const userCars = allCars.filter(car => car.user_id === user.id);
+        console.log('Fetched cars:', userCars);
+        setCars(userCars);
+        
+        if (userCars.length === 0) {
+          toast({
+            title: "Ingen biler funnet",
+            description: "Du må først registrere en bil før du kan laste opp dokumenter",
+            variant: "destructive"
+          });
+        }
+      } else {
+        setCars([]);
         toast({
           title: "Ingen biler funnet",
           description: "Du må først registrere en bil før du kan laste opp dokumenter",

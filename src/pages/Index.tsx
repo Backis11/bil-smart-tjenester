@@ -1,5 +1,5 @@
 
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/MockAuthContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ServiceCards from "@/components/ServiceCards";

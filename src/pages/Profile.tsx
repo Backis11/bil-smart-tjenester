@@ -1,5 +1,5 @@
 
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/MockAuthContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,11 +48,11 @@ const Profile = () => {
               <div className="space-y-3">
                 <div className="flex items-center text-sm text-gray-600">
                   <Calendar className="h-4 w-4 mr-2" />
-                  Medlem siden: {new Date(user?.created_at || '').toLocaleDateString('nb-NO')}
+                  Aktiv bruker
                 </div>
                 <div className="flex items-center text-sm text-gray-600">
                   <Mail className="h-4 w-4 mr-2" />
-                  E-post verifisert: {user?.email_confirmed_at ? 'Ja' : 'Nei'}
+                  E-post bekreftet
                 </div>
               </div>
             </CardContent>

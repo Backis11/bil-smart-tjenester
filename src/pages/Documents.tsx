@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import Header from "@/components/Header";
-import { useDocuments } from "@/hooks/useDocuments";
+import { useDocuments } from "@/hooks/useMockDocuments";
 import DocumentsHeader from "@/components/documents/DocumentsHeader";
 import DocumentsSearch from "@/components/documents/DocumentsSearch";
 import DocumentsGrid from "@/components/documents/DocumentsGrid";

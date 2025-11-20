@@ -1,6 +1,6 @@
 
 import { useParams } from "react-router-dom";
-import { useCarData } from "@/hooks/useCarData";
+import { useCarData } from "@/hooks/useMockCarData";
 import CarDetailLayout from "@/components/car-detail/CarDetailLayout";
 import CarDetailLoading from "@/components/car-detail/CarDetailLoading";
 import CarDetailNotFound from "@/components/car-detail/CarDetailNotFound";

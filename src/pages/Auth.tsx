@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/MockAuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Wrench, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -61,22 +61,16 @@ const Auth = () => {
     setLoading(true);
     
     try {
-      const { data, error } = await signIn(loginData.email, loginData.password);
+      // For mock demo, any email will work (or use a default)
+      const email = loginData.email || 'demo@example.com';
+      const { data, error } = await signIn(email, loginData.password);
       
       if (error) {
-        if (error.message.includes('Invalid login credentials')) {
-          toast({
-            title: "Innlogging feilet",
-            description: "Ugyldig e-post eller passord",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Innlogging feilet",
-            description: error.message,
-            variant: "destructive",
-          });
-        }
+        toast({
+          title: "Innlogging feilet",
+          description: error.message,
+          variant: "destructive",
+        });
         return;
       }
       
@@ -84,6 +78,29 @@ const Auth = () => {
         toast({
           title: "Velkommen!",
           description: "Du er nå logget inn",
+        });
+        navigate('/');
+      }
+    } catch (error: any) {
+      toast({
+        title: "Noe gikk galt",
+        description: "Prøv igjen senere",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleQuickLogin = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await signIn('demo@example.com', '');
+      
+      if (data.user) {
+        toast({
+          title: "Velkommen!",
+          description: "Du er nå logget inn som demo-bruker",
         });
         navigate('/');
       }
@@ -261,6 +278,27 @@ const Auth = () => {
                   
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? "Logger inn..." : "Logg inn"}
+                  </Button>
+                  
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-background px-2 text-muted-foreground">
+                        eller
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    className="w-full" 
+                    disabled={loading}
+                    onClick={handleQuickLogin}
+                  >
+                    Logg inn som demo-bruker (uten passord)
                   </Button>
                 </form>
               </TabsContent>
