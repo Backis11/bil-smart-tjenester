@@ -1,5 +1,5 @@
 
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/MockAuthContext";
 import { Navigate } from "react-router-dom";
 
 interface AuthGuardProps {

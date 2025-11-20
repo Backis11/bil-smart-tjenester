@@ -1,8 +1,8 @@
 
 import { useNavigate } from "react-router-dom";
-import { useCarClaim } from "./useCarClaim";
-import { useVegvesenApi } from "./useVegvesenApi";
-import { useCarRegistration } from "./useCarRegistration";
+import { useCarClaim } from "./useMockCarClaim";
+import { useVegvesenApi } from "./useMockVegvesenApi";
+import { useCarRegistration } from "./useMockCarRegistration";
 
 export const useVegvesenLookup = () => {
   const navigate = useNavigate();

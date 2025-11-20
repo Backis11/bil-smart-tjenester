@@ -4,8 +4,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Plus } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/MockAuthContext";
+
+const CARS_STORAGE_KEY = 'mock_cars_data';
 
 interface Car {
   id: string;
@@ -15,6 +16,7 @@ interface Car {
   license_plate: string;
   inspection_due_date?: string;
   status?: string;
+  user_id: string;
 }
 
 const UserCarsSection = () => {
@@ -24,18 +26,18 @@ const UserCarsSection = () => {
 
   useEffect(() => {
     const fetchCars = async () => {
-      if (!user) return;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
 
       try {
-        const { data, error } = await supabase
-          .from('cars')
-          .select('id, make, model, year, license_plate, inspection_due_date, status')
-          .eq('user_id', user.id)
-          .eq('status', 'active') // Only show active cars
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        setCars(data || []);
+        const data = localStorage.getItem(CARS_STORAGE_KEY);
+        if (data) {
+          const allCars: Car[] = JSON.parse(data);
+          const userCars = allCars.filter(car => car.user_id === user.id && car.status === 'active');
+          setCars(userCars);
+        }
       } catch (error) {
         console.error('Error fetching cars:', error);
       } finally {

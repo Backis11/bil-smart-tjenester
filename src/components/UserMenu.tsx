@@ -1,7 +1,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { User, Settings, LogOut } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/MockAuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 

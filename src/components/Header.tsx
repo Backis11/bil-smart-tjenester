@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Wrench } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/MockAuthContext";
 import { Button } from "@/components/ui/button";
 import SearchBar from "./header/SearchBar";
 import NotificationDropdown from "./header/NotificationDropdown";

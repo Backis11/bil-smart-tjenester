@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { FileText, Upload, TrendingUp } from "lucide-react";
 import DocumentUploadDialog from "./DocumentUploadDialog";
-import { useDocuments } from "@/hooks/useDocuments";
+import { useDocuments } from "@/hooks/useMockDocuments";
 
 const EmptyDocumentsState = ({ onUploadClick }: { onUploadClick: () => void }) => {
   const { uploadDocument, uploading } = useDocuments();
