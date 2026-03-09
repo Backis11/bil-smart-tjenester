@@ -50,11 +50,18 @@ DAYS_NO = ["Mandag", "Tirsdag", "Onsdag", "Torsdag", "Fredag", "Lørdag", "Sønd
 DAY_COLS = [COL["man"], COL["tir"], COL["ons"], COL["tor"], COL["fre"], COL["lor"], COL["son"]]
 # ─── Hjelpefunksjoner ─────────────────────────────────────────────
 def is_section_header(row: list) -> bool:
-    """Sjekk om en rad er en seksjonsoverskrift (ikke verksteddata)."""
+    """Sjekk om en rad er en seksjonsoverskrift (ikke verksteddata).
+    En seksjonsoverskrift har org.nr-kolonnen (index 4) tom — et ekte
+    verksted har alltid org.nr registrert.
+    """
     if len(row) < 5:
         return True
-    empty_count = sum(1 for cell in row[1:] if not cell.strip())
-    return empty_count >= SECTION_HEADER_MIN_EMPTY_COLS
+    # Kolonne-rad (header): første celle er "Verkstednavn"
+    if row[0].strip().lower() == "verkstednavn":
+        return True
+    # Seksjonsoverskrift: org.nr-feltet er tomt
+    orgnr = row[COL["orgnr"]].strip() if len(row) > COL["orgnr"] else ""
+    return not orgnr
 def needs_enrichment(row: list) -> bool:
     """Sjekk om raden mangler data som kan berikes."""
     if is_section_header(row):
@@ -202,7 +209,11 @@ def main():
     # Les CSV
     print(f"📂 Leser: {args.input_csv}")
     with open(args.input_csv, "r", encoding="utf-8-sig") as f:
-        reader = csv.reader(f)
+        sample = f.read(4096)
+        f.seek(0)
+        delimiter = "\t" if sample.count("\t") > sample.count(",") else ","
+        print(f"   Bruker delimiter: {repr(delimiter)}")
+        reader = csv.reader(f, delimiter=delimiter)
         rows = list(reader)
 
     print(f"   {len(rows)} rader totalt")
